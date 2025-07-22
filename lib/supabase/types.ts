@@ -1,6 +1,4 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
-
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       users: {
@@ -30,17 +28,5 @@ export type Database = {
         };
       };
     };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
   };
-};
+}

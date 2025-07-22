@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/supabase/hooks';
+import { useUser, useAuth } from '@/lib/supabase/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { signOut } from '@/lib/supabase/auth';
 
 // Mock data for demonstration
 const mockProjects = [
@@ -79,7 +78,8 @@ const mockProjects = [
 ];
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useUser();
+  const { signOut } = useAuth();
   const router = useRouter();
   const [projects, setProjects] = useState(mockProjects);
 
@@ -188,6 +188,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">

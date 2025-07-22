@@ -42,6 +42,31 @@ export function useAuth() {
       email,
       password,
     });
+
+    if (!error && data.user) {
+      console.log('User signed in:', data.user);
+      try {
+        const response = await fetch('/api/auth/sync-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: data.user.id,
+            email: data.user.email,
+            fullName: data.user.user_metadata?.full_name,
+            avatarUrl: data.user.user_metadata?.avatar_url,
+          }),
+        });
+
+        if (!response.ok) {
+          console.warn('Failed to sync user to database');
+        }
+      } catch (syncError) {
+        console.warn('Error syncing user to database:', syncError);
+      }
+    }
+
     return { data, error };
   };
 
