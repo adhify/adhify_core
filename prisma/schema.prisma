@@ -1,0 +1,1132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================================
+// AUTHENTICATION & USER MANAGEMENT
+// ================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Authentication
+  emailVerified DateTime?
+  password      String?
+
+  // Role-based access
+  role UserRole @default(USER)
+
+  // Account status
+  status        UserStatus @default(ACTIVE)
+  lastLoginAt   DateTime?
+  loginAttempts Int        @default(0)
+  lockedUntil   DateTime?
+
+  // Relationships
+  teamMemberships TeamMember[]
+  createdTeams    Team[]       @relation("TeamOwner")
+  sessions        Session[]
+  auditLogs       AuditLog[]
+
+  // SuperAdmin relationships
+  superAdminSessions    SuperAdminSession[] @relation("SuperAdmin")
+  impersonationSessions SuperAdminSession[] @relation("ImpersonatedUser")
+  notifications         Notification[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Session metadata
+  ipAddress String?
+  userAgent String?
+  isActive  Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum UserRole {
+  SUPERADMIN // Can access all teams and manage platform
+  USER // Regular user
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+// ================================
+// TEAM & MULTITENANCY
+// ================================
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  avatar      String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Team status and settings
+  status   TeamStatus @default(ACTIVE)
+  settings Json? // Team-specific settings
+
+  // Owner relationship
+  ownerId String
+  owner   User   @relation("TeamOwner", fields: [ownerId], references: [id])
+
+  // Subscription
+  subscriptionId String?       @unique
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  // Relationships
+  members            TeamMember[]
+  projects           Project[]
+  usageRecords       UsageRecord[]
+  auditLogs          AuditLog[]
+  superAdminSessions SuperAdminSession[] @relation("ImpersonatedTeam")
+  notifications      Notification[]
+  apiKeys            ApiKey[]
+  serverAllocations  ServerAllocation[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  teamId   String
+  userId   String
+  role     TeamRole
+  joinedAt DateTime @default(now())
+
+  // Member status
+  status    MemberStatus @default(ACTIVE)
+  invitedBy String?
+  invitedAt DateTime?
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum TeamStatus {
+  ACTIVE
+  SUSPENDED
+  TRIAL
+  PAYMENT_FAILED
+}
+
+enum MemberStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+// ================================
+// SERVER INFRASTRUCTURE
+// ================================
+
+model Server {
+  id        String         @id @default(cuid())
+  name      String
+  hostname  String         @unique
+  ipAddress String         @unique
+  region    String // "us-east-1", "eu-west-1", etc.
+  provider  ServerProvider
+  status    ServerStatus   @default(PROVISIONING)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  // Server specifications
+  cpu       Int // CPU cores
+  memory    Int // Memory in GB
+  storage   Int // Storage in GB
+  bandwidth Int // Bandwidth in GB/month
+
+  // Server configuration
+  operatingSystem   String  @default("ubuntu-22.04")
+  dockerVersion     String?
+  kubernetesVersion String?
+
+  // Connection details
+  sshPort  Int     @default(22)
+  sshUser  String  @default("root")
+  sshKeyId String? // Reference to SSH key
+
+  // Server metadata
+  metadata Json? // Provider-specific metadata
+  tags     String[] // Server tags for organization
+
+  // Cost and billing
+  hourlyCost  Float? // Cost per hour in USD
+  monthlyCost Float? // Estimated monthly cost
+
+  // Server health and monitoring
+  lastHealthCheck DateTime?
+  healthStatus    HealthStatus @default(UNKNOWN)
+
+  // Relationships
+  serverGroup        ServerGroup?         @relation(fields: [serverGroupId], references: [id])
+  serverGroupId      String?
+  allocations        ServerAllocation[]
+  deployments        ResourceDeployment[]
+  metrics            ServerMetric[]
+  maintenanceWindows ServerMaintenance[]
+
+  @@map("servers")
+}
+
+model ServerGroup {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  region      String
+  provider    ServerProvider
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Group configuration
+  autoScaling    Boolean @default(false)
+  minServers     Int     @default(1)
+  maxServers     Int     @default(10)
+  targetCpuUsage Int     @default(70) // Target CPU usage percentage
+
+  // Load balancing
+  loadBalancerEnabled Boolean @default(false)
+  loadBalancerConfig  Json?
+
+  // Relationships
+  servers    Server[]
+  planGroups PlanServerGroup[]
+
+  @@map("server_groups")
+}
+
+enum ServerProvider {
+  AWS
+  DIGITALOCEAN
+  LINODE
+  VULTR
+  HETZNER
+  GCP
+  AZURE
+  DEDICATED
+  SELF_HOSTED
+}
+
+enum ServerStatus {
+  PROVISIONING
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  ERROR
+  TERMINATED
+}
+
+enum HealthStatus {
+  HEALTHY
+  WARNING
+  CRITICAL
+  UNKNOWN
+}
+
+// ================================
+// SERVER ALLOCATION & RESOURCE MANAGEMENT
+// ================================
+
+model ServerAllocation {
+  id        String   @id @default(cuid())
+  serverId  String
+  teamId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Resource allocation
+  allocatedCpu     Float // CPU cores allocated
+  allocatedMemory  Int // Memory in MB allocated
+  allocatedStorage Int // Storage in MB allocated
+
+  // Usage tracking
+  currentCpuUsage     Float @default(0)
+  currentMemoryUsage  Int   @default(0)
+  currentStorageUsage Int   @default(0)
+
+  // Allocation metadata
+  priority AllocationPriority @default(NORMAL)
+  metadata Json?
+
+  // Relationships
+  server              Server               @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  team                Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  resourceDeployments ResourceDeployment[]
+
+  @@unique([serverId, teamId])
+  @@map("server_allocations")
+}
+
+enum AllocationPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+// ================================
+// RESOURCE DEPLOYMENT
+// ================================
+
+model ResourceDeployment {
+  id           String                 @id @default(cuid())
+  serverId     String
+  allocationId String
+  resourceType DeploymentResourceType
+  resourceId   String // ID of the app, database, or service
+  status       DeploymentStatus       @default(PENDING)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  // Deployment configuration
+  containerName   String?
+  containerImage  String?
+  containerPorts  Json? // Port mappings
+  environmentVars Json? // Environment variables
+  volumes         Json? // Volume mounts
+
+  // Resource requirements
+  cpuRequest    Float? // CPU request in cores
+  cpuLimit      Float? // CPU limit in cores
+  memoryRequest Int? // Memory request in MB
+  memoryLimit   Int? // Memory limit in MB
+
+  // Deployment metadata
+  deploymentConfig  Json? // Full deployment configuration
+  healthCheckConfig Json? // Health check configuration
+
+  // Networking
+  internalPort Int?
+  externalPort Int?
+  domain       String?
+  sslEnabled   Boolean @default(false)
+
+  // Relationships
+  server     Server           @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  allocation ServerAllocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  logs       DeploymentLog[]
+
+  @@map("resource_deployments")
+}
+
+model DeploymentLog {
+  id           String   @id @default(cuid())
+  deploymentId String
+  timestamp    DateTime @default(now())
+  level        LogLevel
+  message      String
+  source       String? // Container, system, etc.
+
+  // Log metadata
+  metadata Json?
+
+  deployment ResourceDeployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+
+  @@map("deployment_logs")
+}
+
+enum DeploymentResourceType {
+  APP
+  DATABASE
+  SERVICE
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
+// ================================
+// SUBSCRIPTION & PLAN SERVER ALLOCATION
+// ================================
+
+model Plan {
+  id          String       @id @default(cuid())
+  name        String       @unique // "free", "pro", "enterprise"
+  displayName String // "Free Plan", "Pro Plan", "Enterprise"
+  description String?
+  price       Int // Price in cents
+  interval    PlanInterval // monthly, yearly
+  isActive    Boolean      @default(true)
+  isPublic    Boolean      @default(true) // Whether plan is publicly available
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Plan features and metadata
+  features Json? // JSON array of plan features
+  metadata Json? // Additional plan metadata
+
+  // Resource limits
+  limits PlanLimit[]
+
+  // Server allocation
+  serverGroups PlanServerGroup[]
+
+  // Relationships
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model PlanServerGroup {
+  id            String @id @default(cuid())
+  planId        String
+  serverGroupId String
+  priority      Int    @default(0) // Higher priority gets better servers
+
+  // Resource allocation rules
+  maxCpuPerTeam     Float? // Max CPU cores per team
+  maxMemoryPerTeam  Int? // Max memory in GB per team
+  maxStoragePerTeam Int? // Max storage in GB per team
+
+  plan        Plan        @relation(fields: [planId], references: [id], onDelete: Cascade)
+  serverGroup ServerGroup @relation(fields: [serverGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, serverGroupId])
+  @@map("plan_server_groups")
+}
+
+model PlanLimit {
+  id       String       @id @default(cuid())
+  planId   String
+  resource ResourceType
+  limit    Int // -1 for unlimited
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, resource])
+  @@map("plan_limits")
+}
+
+enum PlanInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum ResourceType {
+  PROJECTS
+  APPS
+  DATABASES
+  SERVICES
+  TEAM_MEMBERS
+  STORAGE_GB
+  BANDWIDTH_GB
+  ENVIRONMENTS
+  API_CALLS
+  DEPLOYMENTS
+  CPU_CORES
+  MEMORY_GB
+  CONCURRENT_BUILDS
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  status             SubscriptionStatus
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  canceledAt         DateTime?
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  // Plan relationship
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  // External billing provider data
+  stripeSubscriptionId  String? @unique
+  stripeCustomerId      String?
+  stripePaymentMethodId String?
+
+  // Billing details
+  nextBillingDate   DateTime?
+  lastPaymentDate   DateTime?
+  lastPaymentAmount Int?
+
+  // Relationships
+  team     Team?
+  invoices Invoice[]
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  subscriptionId String
+  amount         Int // Amount in cents
+  currency       String        @default("usd")
+  status         InvoiceStatus
+  dueDate        DateTime
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+
+  // External billing data
+  stripeInvoiceId String? @unique
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+  TRIALING
+  PAUSED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+}
+
+// ================================
+// SERVER MONITORING & METRICS
+// ================================
+
+model ServerMetric {
+  id        String   @id @default(cuid())
+  serverId  String
+  timestamp DateTime @default(now())
+
+  // System metrics
+  cpuUsage     Float // CPU usage percentage
+  memoryUsage  Float // Memory usage percentage
+  storageUsage Float // Storage usage percentage
+  networkIn    BigInt // Network bytes in
+  networkOut   BigInt // Network bytes out
+
+  // Load metrics
+  loadAverage1m  Float?
+  loadAverage5m  Float?
+  loadAverage15m Float?
+
+  // Additional metrics
+  diskIops       Int?
+  networkLatency Float?
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@map("server_metrics")
+}
+
+model ServerMaintenance {
+  id          String            @id @default(cuid())
+  serverId    String
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  status      MaintenanceStatus @default(SCHEDULED)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@map("server_maintenance")
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+// ================================
+// PROJECT STRUCTURE (Updated)
+// ================================
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Project metadata
+  repository String?
+  framework  String?
+  tags       String[] // Array of tags for categorization
+
+  // Team relationship (multitenancy)
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  apps         App[]
+  databases    Database[]
+  services     Service[]
+  environments Environment[]
+  deployments  Deployment[]
+  usageRecords UsageRecord[]
+
+  @@unique([teamId, slug])
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+  SUSPENDED
+}
+
+model Environment {
+  id        String          @id @default(cuid())
+  name      String // "production", "staging", "development"
+  type      EnvironmentType
+  isDefault Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  // Environment configuration
+  variables Json? // Environment-specific variables
+  domains   String[] // Custom domains for this environment
+
+  // Project relationship
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  apps        App[]
+  databases   Database[]
+  services    Service[]
+  deployments Deployment[]
+
+  @@unique([projectId, name])
+  @@map("environments")
+}
+
+enum EnvironmentType {
+  PRODUCTION
+  STAGING
+  DEVELOPMENT
+  PREVIEW
+}
+
+// ================================
+// RESOURCES (APPS, DATABASES, SERVICES) - Updated
+// ================================
+
+model App {
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  framework    String? // "Next.js", "React", "Node.js", etc.
+  status       AppStatus @default(STOPPED)
+  url          String?
+  repository   String?
+  branch       String?   @default("main")
+  buildCommand String?
+  startCommand String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // App configuration
+  config Json? // App-specific configuration
+
+  // Resource requirements
+  cpuRequest     Float? @default(0.1) // CPU cores requested
+  cpuLimit       Float? @default(1.0) // CPU cores limit
+  memoryRequest  Int?   @default(128) // Memory in MB requested
+  memoryLimit    Int?   @default(512) // Memory in MB limit
+  storageRequest Int?   @default(1024) // Storage in MB requested
+
+  // Scaling configuration
+  minReplicas Int     @default(1)
+  maxReplicas Int     @default(1)
+  autoScale   Boolean @default(false)
+
+  // Project relationship
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Environment relationship
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  deployments Deployment[]
+  envVars     EnvironmentVariable[]
+
+  @@unique([projectId, environmentId, name])
+  @@map("apps")
+}
+
+enum AppStatus {
+  RUNNING
+  STOPPED
+  DEPLOYING
+  ERROR
+  BUILDING
+  STARTING
+  STOPPING
+  SCALING
+}
+
+model Database {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  type        DatabaseType
+  version     String?
+  status      DatabaseStatus @default(STOPPED)
+  host        String?
+  port        Int?
+  username    String?
+  password    String? // Should be encrypted
+  size        BigInt?        @default(0) // Size in bytes
+  connections Int?           @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Database configuration
+  config Json? // Database-specific configuration
+
+  // Resource requirements
+  cpuRequest     Float? @default(0.1) // CPU cores requested
+  cpuLimit       Float? @default(0.5) // CPU cores limit
+  memoryRequest  Int?   @default(256) // Memory in MB requested
+  memoryLimit    Int?   @default(1024) // Memory in MB limit
+  storageRequest Int?   @default(5120) // Storage in MB requested
+  storageLimit   Int?   @default(10240) // Storage in MB limit
+
+  // Connection limits
+  maxConnections Int? @default(100)
+
+  // Project relationship
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Environment relationship
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  backups DatabaseBackup[]
+
+  @@unique([projectId, environmentId, name])
+  @@map("databases")
+}
+
+enum DatabaseType {
+  POSTGRESQL
+  MYSQL
+  MONGODB
+  REDIS
+  SQLITE
+  MARIADB
+  ELASTICSEARCH
+}
+
+enum DatabaseStatus {
+  RUNNING
+  STOPPED
+  MAINTENANCE
+  ERROR
+  CREATING
+  BACKING_UP
+  RESTORING
+  SCALING
+}
+
+model DatabaseBackup {
+  id          String       @id @default(cuid())
+  filename    String
+  size        BigInt
+  status      BackupStatus
+  type        BackupType   @default(MANUAL)
+  createdAt   DateTime     @default(now())
+  completedAt DateTime?
+  expiresAt   DateTime?
+
+  // Backup metadata
+  metadata Json?
+
+  databaseId String
+  database   Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+
+  @@map("database_backups")
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+enum BackupType {
+  MANUAL
+  SCHEDULED
+  AUTOMATIC
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  type        ServiceType
+  version     String?
+  status      ServiceStatus @default(STOPPED)
+  config      Json? // Service-specific configuration
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Resource requirements
+  cpuRequest    Float? @default(0.1) // CPU cores requested
+  cpuLimit      Float? @default(0.5) // CPU cores limit
+  memoryRequest Int?   @default(128) // Memory in MB requested
+  memoryLimit   Int?   @default(512) // Memory in MB limit
+
+  // Service endpoints and configuration
+  endpoints   Json? // Service endpoints
+  healthCheck Json? // Health check configuration
+
+  // Project relationship
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Environment relationship
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, environmentId, name])
+  @@map("services")
+}
+
+enum ServiceType {
+  REDIS
+  ELASTICSEARCH
+  RABBITMQ
+  SMTP
+  OAUTH
+  WEBHOOK
+  CRON
+  QUEUE
+  MONITORING
+  LOGGING
+  PROXY
+  LOAD_BALANCER
+}
+
+enum ServiceStatus {
+  RUNNING
+  STOPPED
+  ERROR
+  STARTING
+  STOPPING
+  UNHEALTHY
+  SCALING
+}
+
+// ================================
+// DEPLOYMENTS & ENVIRONMENT VARIABLES
+// ================================
+
+model Deployment {
+  id          String           @id @default(cuid())
+  status      DeploymentStatus
+  branch      String?
+  commit      String?
+  message     String?
+  logs        String?
+  startedAt   DateTime         @default(now())
+  completedAt DateTime?
+
+  // Deployment metadata
+  triggeredBy String? // User ID who triggered deployment
+  buildTime   Int? // Build time in seconds
+  deployUrl   String? // Deployment URL
+
+  // Relationships
+  projectId     String
+  project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  appId         String?
+  app           App?        @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@map("deployments")
+}
+
+enum DeploymentStatus {
+  PENDING
+  BUILDING
+  DEPLOYING
+  SUCCESS
+  FAILED
+  CANCELED
+  QUEUED
+}
+
+model EnvironmentVariable {
+  id        String   @id @default(cuid())
+  key       String
+  value     String // Should be encrypted for sensitive values
+  isSecret  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Variable metadata
+  description String?
+
+  // App relationship
+  appId String
+  app   App    @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([appId, key])
+  @@map("environment_variables")
+}
+
+// ================================
+// API MANAGEMENT
+// ================================
+
+model ApiKey {
+  id         String       @id @default(cuid())
+  name       String
+  key        String       @unique // Hashed API key
+  prefix     String // First few characters for identification
+  scopes     String[] // Array of scopes/permissions
+  status     ApiKeyStatus @default(ACTIVE)
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  // Rate limiting
+  rateLimit Int? // Requests per minute
+
+  // Team relationship
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Usage tracking
+  usageLogs ApiUsageLog[]
+
+  @@map("api_keys")
+}
+
+model ApiUsageLog {
+  id           String   @id @default(cuid())
+  apiKeyId     String
+  endpoint     String
+  method       String
+  statusCode   Int
+  responseTime Int // Response time in milliseconds
+  timestamp    DateTime @default(now())
+
+  // Request metadata
+  ipAddress String?
+  userAgent String?
+
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@map("api_usage_logs")
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  INACTIVE
+  REVOKED
+}
+
+// ================================
+// USAGE TRACKING & ANALYTICS
+// ================================
+
+model UsageRecord {
+  id        String       @id @default(cuid())
+  resource  ResourceType
+  amount    Int
+  unit      String // "count", "bytes", "requests", etc.
+  timestamp DateTime     @default(now())
+
+  // Usage metadata
+  metadata Json?
+
+  // Team relationship for billing
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Optional project relationship for detailed tracking
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("usage_records")
+}
+
+// ================================
+// AUDIT LOGGING & SUPERADMIN
+// ================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String // "create", "update", "delete", "login", etc.
+  resource   String // "project", "app", "database", etc.
+  resourceId String?
+  details    Json? // Additional context
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime @default(now())
+
+  // User who performed the action
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Team context (for multitenancy)
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+model SuperAdminSession {
+  id                 String    @id @default(cuid())
+  superAdminId       String
+  impersonatedTeamId String?
+  impersonatedUserId String?
+  startedAt          DateTime  @default(now())
+  endedAt            DateTime?
+  reason             String? // Reason for impersonation
+
+  // Session metadata
+  ipAddress String?
+  userAgent String?
+
+  superAdmin       User  @relation("SuperAdmin", fields: [superAdminId], references: [id], onDelete: Cascade)
+  impersonatedTeam Team? @relation("ImpersonatedTeam", fields: [impersonatedTeamId], references: [id], onDelete: Cascade)
+  impersonatedUser User? @relation("ImpersonatedUser", fields: [impersonatedUserId], references: [id], onDelete: Cascade)
+
+  @@map("superadmin_sessions")
+}
+
+// ================================
+// NOTIFICATIONS & ALERTS
+// ================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Notification metadata
+  metadata  Json?
+  actionUrl String? // URL for notification action
+
+  // Team relationship
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Optional user relationship for personal notifications
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+  BILLING
+  DEPLOYMENT
+  MAINTENANCE
+  SECURITY
+  USAGE_LIMIT
+  SERVER_ALERT
+}
+
+// ================================
+// SYSTEM CONFIGURATION
+// ================================
+
+model SystemSetting {
+  id        String      @id @default(cuid())
+  key       String      @unique
+  value     String
+  type      SettingType
+  isPublic  Boolean     @default(false) // Whether setting is publicly readable
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("system_settings")
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+model MaintenanceWindow {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("maintenance_windows")
+}
