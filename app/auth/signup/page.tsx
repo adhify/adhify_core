@@ -37,7 +37,7 @@ export default function SignUpPage() {
     }
 
     const { data, error } = await signUp(email, password, fullName);
-
+    console.log('SignUp Data:', data);
     if (error) {
       setError(error.message);
       setLoading(false);
