@@ -230,10 +230,10 @@ export default function HomePage() {
           </Button>
 
           {/* Countdown */}
-          <div className="mt-12">
+          {/* <div className="mt-12">
             <h3 className="text-xl font-semibold mb-2">MVP Launch Countdown</h3>
             <CountdownTimer targetDate={mvpLaunchDate} />
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -300,7 +300,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Team & Social Proof Section */}
+      {/* Team & Social Proof Section
       <section className="py-20 px-4 bg-blue-50">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">Meet the Team Behind Adhify</h2>
@@ -310,7 +310,7 @@ export default function HomePage() {
           </p>
           <div className="flex justify-center space-x-8">
             {/* Replace these with real team member images and profiles if available */}
-            <div className="text-center">
+      {/* <div className="text-center">
               <div className="w-24 h-24 bg-blue-600 rounded-full inline-flex items-center justify-center text-white text-3xl font-bold">
                 PP
               </div>
@@ -333,7 +333,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
       <footer className="py-12 px-4 bg-gray-900 text-white">
@@ -381,7 +381,7 @@ export default function HomePage() {
                     <Mail className="w-5 h-5" />
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     href="https://twitter.com/adhify"
                     target="_blank"
@@ -391,8 +391,8 @@ export default function HomePage() {
                   >
                     <Twitter className="w-5 h-5" />
                   </Link>
-                </li>
-                <li>
+                </li> */}
+                {/* <li>
                   <Link
                     href="https://github.com/adhify"
                     target="_blank"
@@ -402,7 +402,7 @@ export default function HomePage() {
                   >
                     <Github className="w-5 h-5" />
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     href="https://linkedin.com/company/adhify"
