@@ -1,99 +1,108 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { EnvironmentSwitcher } from "../layout/environment-switcher"
-import { Plus, Search, Filter, Database, Settings, Trash2, Activity, HardDrive, Zap } from "lucide-react"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { EnvironmentSwitcher } from '../layout/environment-switcher';
+import { Plus, Search, Filter, Database, Settings, Trash2, Activity, HardDrive, Zap } from 'lucide-react';
 
-export function DatabasesTab() {
-  const [searchQuery, setSearchQuery] = useState("")
+interface DatabaseOverviewProps {
+  projectId: string;
+}
+
+export function DatabasesTab({ projectId }: DatabaseOverviewProps) {
+  const [searchQuery, setSearchQuery] = useState('');
 
   const databases = [
     {
-      id: "1",
-      name: "User Database",
-      type: "PostgreSQL",
-      status: "running" as const,
-      environment: "production",
-      size: "2.4 GB",
+      id: '1',
+      name: 'User Database',
+      type: 'PostgreSQL',
+      status: 'running' as const,
+      environment: 'production',
+      size: '2.4 GB',
       connections: 12,
-      lastBackup: "2 hours ago",
-      description: "Main database for user data and authentication",
-      version: "14.2",
+      lastBackup: '2 hours ago',
+      description: 'Main database for user data and authentication',
+      version: '14.2',
     },
     {
-      id: "2",
-      name: "Analytics DB",
-      type: "MongoDB",
-      status: "running" as const,
-      environment: "production",
-      size: "890 MB",
+      id: '2',
+      name: 'Analytics DB',
+      type: 'MongoDB',
+      status: 'running' as const,
+      environment: 'production',
+      size: '890 MB',
       connections: 5,
-      lastBackup: "6 hours ago",
-      description: "Analytics and metrics data storage",
-      version: "6.0",
+      lastBackup: '6 hours ago',
+      description: 'Analytics and metrics data storage',
+      version: '6.0',
     },
     {
-      id: "3",
-      name: "Cache Store",
-      type: "Redis",
-      status: "running" as const,
-      environment: "production",
-      size: "156 MB",
+      id: '3',
+      name: 'Cache Store',
+      type: 'Redis',
+      status: 'running' as const,
+      environment: 'production',
+      size: '156 MB',
       connections: 24,
-      lastBackup: "1 hour ago",
-      description: "Session and application cache",
-      version: "7.0",
+      lastBackup: '1 hour ago',
+      description: 'Session and application cache',
+      version: '7.0',
     },
     {
-      id: "4",
-      name: "Test Database",
-      type: "PostgreSQL",
-      status: "stopped" as const,
-      environment: "development",
-      size: "45 MB",
+      id: '4',
+      name: 'Test Database',
+      type: 'PostgreSQL',
+      status: 'stopped' as const,
+      environment: 'development',
+      size: '45 MB',
       connections: 0,
-      lastBackup: "1 day ago",
-      description: "Development and testing database",
-      version: "14.2",
+      lastBackup: '1 day ago',
+      description: 'Development and testing database',
+      version: '14.2',
     },
-  ]
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "running":
-        return "bg-green-100 text-green-800"
-      case "stopped":
-        return "bg-gray-100 text-gray-800"
-      case "error":
-        return "bg-red-100 text-red-800"
-      case "maintenance":
-        return "bg-yellow-100 text-yellow-800"
+      case 'running':
+        return 'bg-green-100 text-green-800';
+      case 'stopped':
+        return 'bg-gray-100 text-gray-800';
+      case 'error':
+        return 'bg-red-100 text-red-800';
+      case 'maintenance':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800"
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case "postgresql":
-        return "bg-blue-100 text-blue-800"
-      case "mongodb":
-        return "bg-green-100 text-green-800"
-      case "redis":
-        return "bg-red-100 text-red-800"
-      case "mysql":
-        return "bg-orange-100 text-orange-800"
+      case 'postgresql':
+        return 'bg-blue-100 text-blue-800';
+      case 'mongodb':
+        return 'bg-green-100 text-green-800';
+      case 'redis':
+        return 'bg-red-100 text-red-800';
+      case 'mysql':
+        return 'bg-orange-100 text-orange-800';
       default:
-        return "bg-gray-100 text-gray-800"
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
-  const filteredDatabases = databases.filter((db) => db.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredDatabases = databases.filter((db) => db.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="p-6 space-y-6">
@@ -101,7 +110,7 @@ export function DatabasesTab() {
         <div>
           <h2 className="text-2xl font-bold">Databases</h2>
           <p className="text-muted-foreground">
-            {databases.length} databases in this project • {databases.filter((d) => d.status === "running").length}{" "}
+            {databases.length} databases in this project • {databases.filter((d) => d.status === 'running').length}{' '}
             running
           </p>
         </div>
@@ -222,7 +231,7 @@ export function DatabasesTab() {
           <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No databases found</h3>
           <p className="text-muted-foreground mb-4">
-            {searchQuery ? "Try adjusting your search terms" : "Get started by creating your first database"}
+            {searchQuery ? 'Try adjusting your search terms' : 'Get started by creating your first database'}
           </p>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
@@ -231,5 +240,5 @@ export function DatabasesTab() {
         </div>
       )}
     </div>
-  )
+  );
 }

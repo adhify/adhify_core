@@ -43,7 +43,6 @@ export async function POST(request: NextRequest) {
     } else {
       // Update existing user
       const updatedUser = await userService.update(userId, {
-        email: email,
         fullName: fullName || existingUser.name,
         avatarUrl: avatarUrl || existingUser.avatar,
       });
