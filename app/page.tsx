@@ -90,7 +90,11 @@ export default function HomePage() {
             transparency, affordability, and local support.
           </p>
           <Button size="lg" asChild>
-            <Link href="https://tally.so/r/your-waitlist-form" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://forms.zohopublic.com/adminadh1/form/AdhifyEarlyAccessandUpdateSubscription/formperma/Cxi7SR_zztlUKsiUTjlXL7EH8eM2Xp2fdGusjmKZAEw"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Get Updates & Join Early Access
             </Link>
           </Button>
@@ -224,7 +228,11 @@ export default function HomePage() {
             </li>
           </ul>
           <Button size="lg" asChild>
-            <Link href="https://tally.so/r/your-waitlist-form" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://forms.zohopublic.com/adminadh1/form/AdhifyEarlyAccessandUpdateSubscription/formperma/Cxi7SR_zztlUKsiUTjlXL7EH8eM2Xp2fdGusjmKZAEw"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Join Early Access Now
             </Link>
           </Button>
@@ -252,7 +260,7 @@ export default function HomePage() {
           </ul>
           <div className="mt-6">
             <Link
-              href="https://your-blog-or-medium-link.com"
+              href="https://linkedin.com/company/adhify"
               className="text-blue-600 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
