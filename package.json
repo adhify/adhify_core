@@ -14,7 +14,8 @@
     "db:reset": "prisma migrate dev reset",
     "migrate-dev": "prisma migrate dev",
     "migrate-dev-create": "prisma migrate dev --create-only",
-    "migrate": "prisma migrate"
+    "migrate": "prisma migrate",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
