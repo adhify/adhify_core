@@ -98,6 +98,9 @@ export default function HomePage() {
               Get Updates & Join Early Access
             </Link>
           </Button>
+          <div className="mt-4 flex items-center justify-center">
+            <img src="/zohoform-qr.png" alt="Zoho Form QR Code" className="w-48 h-48" />
+          </div>
           <div className="mt-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
             <div className="flex items-center">
               <ShieldCheck className="h-4 w-4 text-green-500 mr-2" />
@@ -236,7 +239,9 @@ export default function HomePage() {
               Join Early Access Now
             </Link>
           </Button>
-
+          <div className="mt-4 flex items-center justify-center">
+            <img src="/zohoform-qr.png" alt="Zoho Form QR Code" className="w-48 h-48" />
+          </div>
           {/* Countdown */}
           {/* <div className="mt-12">
             <h3 className="text-xl font-semibold mb-2">MVP Launch Countdown</h3>
