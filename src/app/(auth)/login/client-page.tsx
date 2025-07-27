@@ -1,33 +1,19 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import Link from 'next/link';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Loader2 } from "lucide-react";
+import { Loader2 } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { supabaseBrowser } from "@/util/supabase/browser";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useAuth } from '@/util/supabase/hooks';
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -38,16 +24,12 @@ type LoginFormType = z.infer<typeof loginSchema>;
 export function LoginClientPage() {
   const form = useForm<LoginFormType>({
     resolver: zodResolver(loginSchema),
-    reValidateMode: "onChange",
+    reValidateMode: 'onChange',
   });
-
+  const { signIn } = useAuth();
   const onSubmit: Parameters<typeof form.handleSubmit>[0] = async (data) => {
     const { email, password } = data;
-    const supabase = supabaseBrowser();
-    const authResponse = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const authResponse = await signIn(email, password);
 
     if (authResponse.error) {
       toast.error(`Error signing in - ${authResponse.error.message}`);
@@ -57,7 +39,7 @@ export function LoginClientPage() {
     toast.success(`Successfully logged in.`);
 
     // NOTE: you can redirect anywhere
-    window.location.href = "/dashboard";
+    window.location.href = '/dashboard';
   };
 
   return (
@@ -67,9 +49,7 @@ export function LoginClientPage() {
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription>
-                Enter your email below to login to your account
-              </CardDescription>
+              <CardDescription>Enter your email below to login to your account</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
@@ -81,12 +61,7 @@ export function LoginClientPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="email"
-                            required
-                            tabIndex={1}
-                          />
+                          <Input {...field} type="email" required tabIndex={1} />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
@@ -113,12 +88,7 @@ export function LoginClientPage() {
                           </div>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="password"
-                            required
-                            tabIndex={2}
-                          />
+                          <Input {...field} type="password" required tabIndex={2} />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
@@ -129,20 +99,14 @@ export function LoginClientPage() {
                 <Button
                   className="w-full"
                   type="submit"
-                  disabled={
-                    form.formState.isSubmitting ||
-                    form.formState.isSubmitted ||
-                    !form.formState.isValid
-                  }
+                  disabled={form.formState.isSubmitting || form.formState.isSubmitted || !form.formState.isValid}
                 >
-                  {form.formState.isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Login
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
+                Don&apos;t have an account?{' '}
                 <Link href="/signup" className="underline" tabIndex={4}>
                   Sign up
                 </Link>

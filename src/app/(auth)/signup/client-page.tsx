@@ -1,37 +1,23 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { supabaseBrowser } from "@/util/supabase/browser";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { supabaseBrowser } from '@/util/supabase/browser';
+import { useAuth } from '@/util/supabase/hooks';
 
 const signupFormSchema = z
   .object({
     email: z.string().email(),
-    password1: z.string().min(8, "Must be at least 8 characters"),
-    password2: z.string().min(8, "Must be at least 8 characters"),
+    password1: z.string().min(8, 'Must be at least 8 characters'),
+    password2: z.string().min(8, 'Must be at least 8 characters'),
 
     // could ask for a username if you wanted to, too
     // username: z.string().min(5),
@@ -43,7 +29,7 @@ const signupFormSchema = z
     if (data.password1 !== data.password2) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["password2"],
+        path: ['password2'],
         message: "Passwords don't match",
       });
     }
@@ -53,30 +39,16 @@ export function SignupClientPage() {
   const form = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
-      email: "",
-      password1: "",
-      password2: "",
+      email: '',
+      password1: '',
+      password2: '',
     },
   });
-
+  const { signUp } = useAuth();
   const onSubmit: Parameters<typeof form.handleSubmit>[0] = async (data) => {
     const { email, password1: password, firstName, lastName } = data;
 
-    const supabase = supabaseBrowser();
-
-    const emailRedirectTo = `${window.location.href}/login`;
-
-    const signupResponse = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo,
-        data: {
-          firstName,
-          lastName,
-        },
-      },
-    });
+    const signupResponse = await signUp(email, password, firstName, lastName);
 
     if (signupResponse.error) {
       toast.error(`Error signing up - ${signupResponse.error.message}`);
@@ -100,8 +72,7 @@ export function SignupClientPage() {
             <CardHeader>
               <CardTitle className="text-xl">Sign Up</CardTitle>
               <CardDescription>
-                Enter your information to create an account. You&apos;ll have to
-                confirm your email.
+                Enter your information to create an account. You&apos;ll have to confirm your email.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -148,12 +119,7 @@ export function SignupClientPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="email"
-                            required
-                            placeholder="example@gmail.com"
-                          />
+                          <Input {...field} type="email" required placeholder="example@gmail.com" />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
@@ -220,21 +186,13 @@ export function SignupClientPage() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={
-                    !form.formState.isValid ||
-                    form.formState.isSubmitting ||
-                    form.formState.isSubmitSuccessful
-                  }
+                  disabled={!form.formState.isValid || form.formState.isSubmitting || form.formState.isSubmitSuccessful}
                 >
-                  {form.formState.isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {form.formState.isSubmitSuccessful
-                    ? "Check your email"
-                    : "Create an account"}
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {form.formState.isSubmitSuccessful ? 'Check your email' : 'Create an account'}
                 </Button>
                 <div>
-                  Already have an account?{" "}
+                  Already have an account?{' '}
                   <Link href="/login" className="underline">
                     Sign in
                   </Link>

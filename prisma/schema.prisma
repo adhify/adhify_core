@@ -35,7 +35,6 @@ model User {
   // Relationships
   teamMemberships TeamMember[]
   createdTeams    Team[]       @relation("TeamOwner")
-  sessions        Session[]
   auditLogs       AuditLog[]
 
   // SuperAdmin relationships
@@ -44,23 +43,6 @@ model User {
   notifications         Notification[]
 
   @@map("users")
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  // Session metadata
-  ipAddress String?
-  userAgent String?
-  isActive  Boolean @default(true)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
 }
 
 enum UserRole {
