@@ -36,8 +36,6 @@ export function LoginClientPage() {
       return;
     }
 
-    toast.success(`Successfully logged in.`);
-
     // NOTE: you can redirect anywhere
     window.location.href = '/dashboard';
   };

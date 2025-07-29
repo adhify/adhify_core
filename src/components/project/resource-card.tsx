@@ -1,58 +1,63 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, ExternalLink, Settings, Trash2, Activity, Database, Server, Globe } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, ExternalLink, Settings, Trash2, Activity, Database, Server, Globe } from 'lucide-react';
 
 interface ResourceCardProps {
   resource: {
-    id: string
-    name: string
-    type: "app" | "database" | "service"
-    status: "running" | "stopped" | "error" | "deploying"
-    url?: string
-    environment: string
-    lastDeployed?: string
-    description?: string
-  }
-  onEdit?: (id: string) => void
-  onDelete?: (id: string) => void
-  onView?: (id: string) => void
+    id: string;
+    name: string;
+    type: 'app' | 'database' | 'service';
+    status: 'running' | 'stopped' | 'error' | 'deploying';
+    url?: string;
+    environment: string;
+    lastDeployed?: string;
+    description?: string;
+  };
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onView?: (id: string) => void;
 }
 
 export function ResourceCard({ resource, onEdit, onDelete, onView }: ResourceCardProps) {
   const getResourceIcon = (type: string) => {
     switch (type) {
-      case "app":
-        return <Globe className="h-5 w-5" />
-      case "database":
-        return <Database className="h-5 w-5" />
-      case "service":
-        return <Server className="h-5 w-5" />
+      case 'app':
+        return <Globe className="h-5 w-5" />;
+      case 'database':
+        return <Database className="h-5 w-5" />;
+      case 'service':
+        return <Server className="h-5 w-5" />;
       default:
-        return <Server className="h-5 w-5" />
+        return <Server className="h-5 w-5" />;
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "running":
-        return "bg-green-100 text-green-800"
-      case "stopped":
-        return "bg-gray-100 text-gray-800"
-      case "error":
-        return "bg-red-100 text-red-800"
-      case "deploying":
-        return "bg-yellow-100 text-yellow-800"
+      case 'running':
+        return 'bg-green-100 text-green-800';
+      case 'stopped':
+        return 'bg-gray-100 text-gray-800';
+      case 'error':
+        return 'bg-red-100 text-red-800';
+      case 'deploying':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return "bg-gray-100 text-gray-800"
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card onClick={() => onView?.(resource.id)} className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -66,27 +71,6 @@ export function ResourceCard({ resource, onEdit, onDelete, onView }: ResourceCar
           </div>
           <div className="flex items-center gap-2">
             <Badge className={`text-xs ${getStatusColor(resource.status)}`}>{resource.status}</Badge>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onView?.(resource.id)} className="gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onEdit?.(resource.id)} className="gap-2">
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDelete?.(resource.id)} className="gap-2 text-red-600">
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
@@ -110,5 +94,5 @@ export function ResourceCard({ resource, onEdit, onDelete, onView }: ResourceCar
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

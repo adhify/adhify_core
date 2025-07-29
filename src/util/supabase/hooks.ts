@@ -43,10 +43,6 @@ export function useAuth() {
       password,
     });
 
-    if (!error && data.user) {
-      console.log('User signed in:', data.user);
-    }
-
     return { data, error };
   };
 
@@ -83,6 +79,11 @@ export function useAuth() {
     return { data, error };
   };
 
+  const deleteUser = async (id: string) => {
+    const { error } = await supabase.auth.admin.deleteUser(id);
+    return { error };
+  };
+
   return {
     user,
     loading,
@@ -91,5 +92,6 @@ export function useAuth() {
     signOut,
     resetPassword,
     updatePassword,
+    deleteUser,
   };
 }

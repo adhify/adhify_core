@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { supabaseBrowser } from '@/util/supabase/browser';
 import { useAuth } from '@/util/supabase/hooks';
+import { clientApi } from '@/trpc/react';
+import { UserStatus } from '@prisma/client';
 
 const signupFormSchema = z
   .object({
@@ -44,7 +45,8 @@ export function SignupClientPage() {
       password2: '',
     },
   });
-  const { signUp } = useAuth();
+  const { signUp, deleteUser } = useAuth();
+  const { mutate: syncUser } = clientApi.auth.sync.useMutation({});
   const onSubmit: Parameters<typeof form.handleSubmit>[0] = async (data) => {
     const { email, password1: password, firstName, lastName } = data;
 
@@ -61,6 +63,22 @@ export function SignupClientPage() {
       throw new Error(message);
     }
 
+    try {
+      syncUser({
+        sub: signupResponse?.data?.user?.user_metadata?.sub || '0',
+        name: signupResponse.data.user.user_metadata?.full_name || `${firstName} ${lastName}`,
+        email: signupResponse?.data?.user?.email || '',
+        status: signupResponse.data.user.user_metadata?.email_verified ? UserStatus.ACTIVE : UserStatus.INACTIVE,
+      });
+    } catch (syncError) {
+      console.error('Error syncing user:', syncError);
+      try {
+        await deleteUser(signupResponse.data?.user?.id || '0');
+      } catch (deleteError) {
+        console.error('Error deleting user:', deleteError);
+      }
+    }
+
     toast.success(`Check your email to confirm your signup.`);
   };
 
@@ -72,7 +90,7 @@ export function SignupClientPage() {
             <CardHeader>
               <CardTitle className="text-xl">Sign Up</CardTitle>
               <CardDescription>
-                Enter your information to create an account. You&apos;ll have to confirm your email.
+                Enter your information to create an account. You'll have to confirm your email.
               </CardDescription>
             </CardHeader>
             <CardContent>
