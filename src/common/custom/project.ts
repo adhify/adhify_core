@@ -1,3 +1,4 @@
+import z from 'zod';
 import { ProjectSchema } from '../validation/generated';
 
 export const ZProject = ProjectSchema;
@@ -13,7 +14,7 @@ export const ZProjectCreateInput = ProjectSchema.pick({
   description: true,
 });
 
-export type ProjectCreateInput = (typeof ZProjectCreateInput)['_output'];
+export type IProjectCreateInput = (typeof ZProjectCreateInput)['_output'];
 
 export const ZProjectUpdateInput = ProjectSchema.pick({
   id: true,
@@ -21,4 +22,15 @@ export const ZProjectUpdateInput = ProjectSchema.pick({
   description: true,
 });
 
-export type ProjectUpdateInput = (typeof ZProjectUpdateInput)['_output'];
+export type IProjectUpdateInput = (typeof ZProjectUpdateInput)['_output'];
+
+export const ZProjectWithStats = ZProject.extend({
+  stats: z
+    .object({
+      apps: z.number(),
+      databases: z.number(),
+    })
+    .nullable(),
+}).nullable();
+
+export type IProjectWithStats = (typeof ZProjectWithStats)['_output'];

@@ -47,7 +47,7 @@ export function TopNav() {
                 {' '}
                 <img src="/adhify_logo_full.svg" alt="Adhify Logo" className="h-20 w-20" />
               </div>
-              <span className="font-semibold text-lg">{`${user?.user_metadata.firstName}'s-project`}</span>
+              <span className="font-semibold text-lg">{`${user?.user_metadata.firstName}'s Team`}</span>
             </div>
           </Link>
         </div>

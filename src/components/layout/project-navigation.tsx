@@ -22,8 +22,7 @@ interface ProjectNavigationProps {
   projectStats: {
     apps: number;
     databases: number;
-    services: number;
-  };
+  } | null;
 }
 
 export function ProjectNavigation({ activeTab, onTabChange, projectName, projectStats }: ProjectNavigationProps) {
@@ -37,13 +36,13 @@ export function ProjectNavigation({ activeTab, onTabChange, projectName, project
       id: 'apps',
       label: 'Apps',
       icon: <Globe className="h-4 w-4" />,
-      badge: projectStats.apps,
+      badge: projectStats?.apps,
     },
     {
       id: 'databases',
       label: 'Databases',
       icon: <Database className="h-4 w-4" />,
-      badge: projectStats.databases,
+      badge: projectStats?.databases,
     },
     {
       id: 'settings',
@@ -57,7 +56,7 @@ export function ProjectNavigation({ activeTab, onTabChange, projectName, project
       <div className="px-6">
         <div className="py-4 border-b">
           <div className="flex items-center gap-4 mb-2">
-            <Link href="/">
+            <Link href="/dashboard">
               <Button variant="ghost" size="sm" className="gap-2 px-2">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Projects
@@ -66,8 +65,8 @@ export function ProjectNavigation({ activeTab, onTabChange, projectName, project
           </div>
           <h1 className="text-2xl font-bold">{projectName}</h1>
           <p className="text-muted-foreground">
-            {projectStats.apps + projectStats.databases + projectStats.services} resources across {projectStats.apps}{' '}
-            apps, {projectStats.databases} databases, and {projectStats.services} services
+            {(projectStats?.apps || 0) + (projectStats?.databases || 0)} resources across {projectStats?.apps} apps and{' '}
+            {projectStats?.databases} databases
           </p>
         </div>
         <div className="flex items-center gap-1 py-2 overflow-x-auto">

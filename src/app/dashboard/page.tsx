@@ -127,7 +127,7 @@ export default function DashboardPage() {
       <TopNav />
       <div className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
@@ -155,16 +155,6 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">{runningResources.databases}</div>
               <p className="text-xs text-muted-foreground">of {totalResources.databases} total</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Services</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{runningResources.services}</div>
-              <p className="text-xs text-muted-foreground">of {totalResources.services} total</p>
             </CardContent>
           </Card>
         </div>
@@ -195,7 +185,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
             <p className="text-gray-600 mb-4">Get started by creating your first project.</p>
-            <Button>
+            <Button onClick={() => setShowProjectModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create Project
             </Button>

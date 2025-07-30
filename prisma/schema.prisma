@@ -24,44 +24,36 @@ datasource db {
 // AUTHENTICATION & USER MANAGEMENT
 // ================================
 
-model User {
-  id        String   @id @default(cuid())
-  sub       String   @unique // Unique identifier from the authentication provider
-  email     String   @unique
-  name      String?
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
 
-  // Authentication
+model User {
+  id            String    @id @default(cuid())
+  sub           String    @unique // Unique identifier from the authentication provider
+  email         String    @unique
+  name          String?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   emailVerified DateTime?
   password      String?
 
-  // Role-based access
-  // role UserRole @default(USER)
-
-  // Account status
   status        UserStatus @default(INACTIVE)
   lastLoginAt   DateTime?
   loginAttempts Int        @default(0)
   lockedUntil   DateTime?
-
-  // Relationships
-  // teamMemberships TeamMember[]
-  // createdTeams    Team[]       @relation("TeamOwner")
-  // auditLogs       AuditLog[]
-
-  // SuperAdmin relationships
-  // superAdminSessions    SuperAdminSession[] @relation("SuperAdmin")
-  // impersonationSessions SuperAdminSession[] @relation("ImpersonatedUser")
-  // notifications         Notification[]
-  project Project[]
+  project       Project[]
 
   @@map("users")
 }
 
 model Project {
   id          String   @id @default(cuid())
+  uuid        String
   name        String
   slug        String
   description String?
@@ -69,16 +61,43 @@ model Project {
   updatedAt   DateTime @updatedAt
 
   // Team relationship (multitenancy)
-  userSub String
-  user    User   @relation(fields: [userSub], references: [sub])
+  userSub  String
+  user     User       @relation(fields: [userSub], references: [sub])
+  apps     App[]
+  Database Database[]
 
-  @@unique([userSub, slug])
+  @@unique([userSub, uuid])
   @@map("projects")
 }
 
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  PENDING_VERIFICATION
+model App {
+  id        String  @id @default(uuid())
+  uuid      String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  envId     String
+
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("apps")
+}
+
+model Database {
+  id        String  @id @default(uuid())
+  uuid      String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  envId     String
+
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("databases")
 }
