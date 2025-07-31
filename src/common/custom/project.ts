@@ -25,12 +25,10 @@ export const ZProjectUpdateInput = ProjectSchema.pick({
 export type IProjectUpdateInput = (typeof ZProjectUpdateInput)['_output'];
 
 export const ZProjectWithStats = ZProject.extend({
-  stats: z
-    .object({
-      apps: z.number(),
-      databases: z.number(),
-    })
-    .nullable(),
-}).nullable();
+  stats: z.object({
+    apps: z.number(),
+    databases: z.number(),
+  }),
+});
 
 export type IProjectWithStats = (typeof ZProjectWithStats)['_output'];

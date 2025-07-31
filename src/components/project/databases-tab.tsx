@@ -30,7 +30,7 @@ export function DatabasesTab({ projectId }: DatabaseOverviewProps) {
       environment: 'production',
       size: '2.4 GB',
       connections: 12,
-      lastBackup: '2 hours ago',
+      last_online_at: '2 hours ago',
       description: 'Main database for user data and authentication',
       version: '14.2',
     },
@@ -42,7 +42,7 @@ export function DatabasesTab({ projectId }: DatabaseOverviewProps) {
       environment: 'production',
       size: '890 MB',
       connections: 5,
-      lastBackup: '6 hours ago',
+      last_online_at: '6 hours ago',
       description: 'Analytics and metrics data storage',
       version: '6.0',
     },
@@ -54,7 +54,7 @@ export function DatabasesTab({ projectId }: DatabaseOverviewProps) {
       environment: 'production',
       size: '156 MB',
       connections: 24,
-      lastBackup: '1 hour ago',
+      last_online_at: '1 hour ago',
       description: 'Session and application cache',
       version: '7.0',
     },
@@ -66,7 +66,7 @@ export function DatabasesTab({ projectId }: DatabaseOverviewProps) {
       environment: 'development',
       size: '45 MB',
       connections: 0,
-      lastBackup: '1 day ago',
+      last_online_at: '1 day ago',
       description: 'Development and testing database',
       version: '14.2',
     },
@@ -160,57 +160,15 @@ export function DatabasesTab({ projectId }: DatabaseOverviewProps) {
                 <div className="flex items-center gap-2">
                   <Badge className={`text-xs ${getTypeColor(database.type)}`}>{database.type}</Badge>
                   <Badge className={`text-xs ${getStatusColor(database.status)}`}>{database.status}</Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="gap-2">
-                        <Database className="h-4 w-4" />
-                        Connect
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-2">
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-2">
-                        <HardDrive className="h-4 w-4" />
-                        Backup
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-2 text-red-600">
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
               <p className="text-sm text-muted-foreground">{database.description}</p>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Size:</span>
-                  <div className="font-medium flex items-center gap-1">
-                    <HardDrive className="h-3 w-3" />
-                    {database.size}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Connections:</span>
-                  <div className="font-medium flex items-center gap-1">
-                    <Zap className="h-3 w-3" />
-                    {database.connections}
-                  </div>
-                </div>
-              </div>
-
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Activity className="h-3 w-3" />
-                <span>Last backup: {database.lastBackup}</span>
+                <span>Last Online: {database.last_online_at}</span>
               </div>
 
               <div className="flex gap-2">

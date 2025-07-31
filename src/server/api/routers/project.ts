@@ -2,7 +2,7 @@ import { createTRPCRouter, authroizedProcedure } from '../trpc';
 import { Prisma } from '@prisma/client';
 import slugify from 'slugify';
 import { ZProjectCreateInput, ZProjects, ZProjectUpdateInput, ZProjectWithStats } from '@/common/custom/project';
-import { ZIdInput } from '@/common/custom';
+import { ZIdInput, ZProjectIdInput } from '@/common/custom';
 import { callCoolifyApi } from '@/util/coolify/coolifyApi';
 import { error } from 'console';
 
@@ -54,26 +54,43 @@ export const projectRouter = createTRPCRouter({
         where: { id: input.id, userSub: ctx.supabaseUser?.id },
       });
 
-      if (!project) {
-        return null;
-      }
+      const appCount = await ctx.db.app.count({
+        where: {
+          userSub: ctx.supabaseUser?.id,
+          resource: {
+            project: {
+              id: input.id,
+              userSub: ctx.supabaseUser?.id,
+            },
+          },
+        },
+      });
 
-      return { ...project, stats: { apps: 0, databases: 0 } };
+      const dbCount = await ctx.db.database.count({
+        where: {
+          userSub: ctx.supabaseUser?.id,
+          resource: {
+            project: {
+              id: input.id,
+              userSub: ctx.supabaseUser?.id,
+            },
+          },
+        },
+      });
+      if (!project) throw new Error('Project Not Found');
+      return { ...project, stats: { apps: appCount, databases: dbCount } };
     }),
 
-  getResources: authroizedProcedure.input(ZIdInput).query(async ({ ctx, input }) => {
-    const project = await ctx.db.project.findUnique({
-      where: { id: input.id, userSub: ctx.supabaseUser?.id },
+  getResources: authroizedProcedure.input(ZProjectIdInput).query(async ({ ctx, input }) => {
+    const resources = await ctx.db.resource.findMany({
+      where: { id: input.projectId, userSub: ctx.supabaseUser?.id },
     });
 
-    if (!project) {
+    if (!resources) {
       return null;
     }
-    const response = await callCoolifyApi<any, CreateProjectPayload>({
-      endpoint: '/resources',
-      method: 'GET',
-    });
-    return [];
+
+    return resources;
   }),
 
   list: authroizedProcedure.output(ZProjects).query(async ({ ctx }) => {

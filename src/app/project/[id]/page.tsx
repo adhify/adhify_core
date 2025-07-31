@@ -23,7 +23,7 @@ export default function ProjectDetailPage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return project && <ProjectOverview projectId={projectId} />;
+        return project && <ProjectOverview project={project} />;
       case 'apps':
         return project && <AppsTab projectId={projectId} />;
       case 'databases':
@@ -31,7 +31,7 @@ export default function ProjectDetailPage() {
       case 'settings':
         return project && <SettingsTab project={project} />;
       default:
-        return project && <ProjectOverview projectId={projectId} />;
+        return project && <ProjectOverview project={project} />;
     }
   };
 

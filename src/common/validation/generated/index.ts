@@ -16,9 +16,11 @@ export const UserScalarFieldEnumSchema = z.enum(['id','sub','email','name','avat
 
 export const ProjectScalarFieldEnumSchema = z.enum(['id','uuid','name','slug','description','createdAt','updatedAt','userSub']);
 
-export const AppScalarFieldEnumSchema = z.enum(['id','uuid','projectId','envId','name','description','createdAt','updatedAt']);
+export const ResourceScalarFieldEnumSchema = z.enum(['id','projectId','envId','type','userSub']);
 
-export const DatabaseScalarFieldEnumSchema = z.enum(['id','uuid','projectId','envId','name','description','createdAt','updatedAt']);
+export const AppScalarFieldEnumSchema = z.enum(['id','uuid','name','description','resouceId','createdAt','updatedAt','userSub']);
+
+export const DatabaseScalarFieldEnumSchema = z.enum(['id','uuid','name','description','resouceId','createdAt','updatedAt','userSub']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -29,6 +31,10 @@ export const NullsOrderSchema = z.enum(['first','last']);
 export const UserStatusSchema = z.enum(['ACTIVE','INACTIVE','SUSPENDED','PENDING_VERIFICATION']);
 
 export type UserStatusType = `${z.infer<typeof UserStatusSchema>}`
+
+export const ResourceTypeSchema = z.enum(['APP','DATABASE']);
+
+export type ResourceTypeType = `${z.infer<typeof ResourceTypeSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -61,12 +67,18 @@ export type User = z.infer<typeof UserSchema>
 
 export type UserRelations = {
   project: ProjectWithRelations[];
+  resource: ResourceWithRelations[];
+  app: AppWithRelations[];
+  database: DatabaseWithRelations[];
 };
 
 export type UserWithRelations = z.infer<typeof UserSchema> & UserRelations
 
 export const UserWithRelationsSchema: z.ZodType<UserWithRelations> = UserSchema.merge(z.object({
   project: z.lazy(() => ProjectWithRelationsSchema).array(),
+  resource: z.lazy(() => ResourceWithRelationsSchema).array(),
+  app: z.lazy(() => AppWithRelationsSchema).array(),
+  database: z.lazy(() => DatabaseWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -91,16 +103,47 @@ export type Project = z.infer<typeof ProjectSchema>
 
 export type ProjectRelations = {
   user: UserWithRelations;
-  apps: AppWithRelations[];
-  Database: DatabaseWithRelations[];
+  resources: ResourceWithRelations[];
 };
 
 export type ProjectWithRelations = z.infer<typeof ProjectSchema> & ProjectRelations
 
 export const ProjectWithRelationsSchema: z.ZodType<ProjectWithRelations> = ProjectSchema.merge(z.object({
   user: z.lazy(() => UserWithRelationsSchema),
-  apps: z.lazy(() => AppWithRelationsSchema).array(),
-  Database: z.lazy(() => DatabaseWithRelationsSchema).array(),
+  resources: z.lazy(() => ResourceWithRelationsSchema).array(),
+}))
+
+/////////////////////////////////////////
+// RESOURCE SCHEMA
+/////////////////////////////////////////
+
+export const ResourceSchema = z.object({
+  type: ResourceTypeSchema,
+  id: z.string(),
+  projectId: z.string(),
+  envId: z.string(),
+  userSub: z.string(),
+})
+
+export type Resource = z.infer<typeof ResourceSchema>
+
+// RESOURCE RELATION SCHEMA
+//------------------------------------------------------
+
+export type ResourceRelations = {
+  project: ProjectWithRelations;
+  app?: AppWithRelations | null;
+  database?: DatabaseWithRelations | null;
+  user: UserWithRelations;
+};
+
+export type ResourceWithRelations = z.infer<typeof ResourceSchema> & ResourceRelations
+
+export const ResourceWithRelationsSchema: z.ZodType<ResourceWithRelations> = ResourceSchema.merge(z.object({
+  project: z.lazy(() => ProjectWithRelationsSchema),
+  app: z.lazy(() => AppWithRelationsSchema).nullish(),
+  database: z.lazy(() => DatabaseWithRelationsSchema).nullish(),
+  user: z.lazy(() => UserWithRelationsSchema),
 }))
 
 /////////////////////////////////////////
@@ -110,12 +153,12 @@ export const ProjectWithRelationsSchema: z.ZodType<ProjectWithRelations> = Proje
 export const AppSchema = z.object({
   id: z.string(),
   uuid: z.string(),
-  projectId: z.string(),
-  envId: z.string(),
   name: z.string(),
   description: z.string().nullish(),
+  resouceId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  userSub: z.string(),
 })
 
 export type App = z.infer<typeof AppSchema>
@@ -124,13 +167,15 @@ export type App = z.infer<typeof AppSchema>
 //------------------------------------------------------
 
 export type AppRelations = {
-  project: ProjectWithRelations;
+  resource: ResourceWithRelations;
+  user: UserWithRelations;
 };
 
 export type AppWithRelations = z.infer<typeof AppSchema> & AppRelations
 
 export const AppWithRelationsSchema: z.ZodType<AppWithRelations> = AppSchema.merge(z.object({
-  project: z.lazy(() => ProjectWithRelationsSchema),
+  resource: z.lazy(() => ResourceWithRelationsSchema),
+  user: z.lazy(() => UserWithRelationsSchema),
 }))
 
 /////////////////////////////////////////
@@ -140,12 +185,12 @@ export const AppWithRelationsSchema: z.ZodType<AppWithRelations> = AppSchema.mer
 export const DatabaseSchema = z.object({
   id: z.string(),
   uuid: z.string(),
-  projectId: z.string(),
-  envId: z.string(),
   name: z.string(),
   description: z.string().nullish(),
+  resouceId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  userSub: z.string(),
 })
 
 export type Database = z.infer<typeof DatabaseSchema>
@@ -154,11 +199,13 @@ export type Database = z.infer<typeof DatabaseSchema>
 //------------------------------------------------------
 
 export type DatabaseRelations = {
-  project: ProjectWithRelations;
+  resource: ResourceWithRelations;
+  user: UserWithRelations;
 };
 
 export type DatabaseWithRelations = z.infer<typeof DatabaseSchema> & DatabaseRelations
 
 export const DatabaseWithRelationsSchema: z.ZodType<DatabaseWithRelations> = DatabaseSchema.merge(z.object({
-  project: z.lazy(() => ProjectWithRelationsSchema),
+  resource: z.lazy(() => ResourceWithRelationsSchema),
+  user: z.lazy(() => UserWithRelationsSchema),
 }))

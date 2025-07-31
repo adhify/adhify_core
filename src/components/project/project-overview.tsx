@@ -6,33 +6,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceCard } from './resource-card';
 import { Plus, Database, Server, Globe, Activity } from 'lucide-react';
 import { clientApi } from '@/trpc/react';
+import { IProjectWithStats } from '@/common/custom/project';
 
 interface ProjectOverviewProps {
-  projectId: string;
+  project: IProjectWithStats;
 }
 
-export function ProjectOverview({ projectId }: ProjectOverviewProps) {
+export function ProjectOverview({ project }: ProjectOverviewProps) {
   const { data: resources } = clientApi.project.getResources.useQuery({
-    id: projectId,
+    projectId: project?.id,
   });
   const stats = [
     {
       title: 'Total Resources',
-      value: '0',
+      value: `${project.stats.apps + project.stats.databases}`,
       icon: <Activity className="h-4 w-4" />,
-      change: '',
       color: 'text-blue-600',
     },
     {
       title: 'Active Apps',
-      value: '0',
+      value: `${project.stats.apps}`,
       icon: <Globe className="h-4 w-4" />,
       change: '',
       color: 'text-green-600',
     },
     {
       title: 'Databases',
-      value: '0',
+      value: `${project.stats.databases}`,
       icon: <Database className="h-4 w-4" />,
       change: '',
       color: 'text-purple-600',
