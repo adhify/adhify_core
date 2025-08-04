@@ -95,10 +95,17 @@ export default function HomePage() {
             transparency, affordability, and local support.
           </p>
           <Button size="lg" asChild>
-            <Link href="https://tally.so/r/your-waitlist-form" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://forms.zohopublic.com/adminadh1/form/AdhifyEarlyAccessandUpdateSubscription/formperma/Cxi7SR_zztlUKsiUTjlXL7EH8eM2Xp2fdGusjmKZAEw"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Get Updates & Join Early Access
             </Link>
           </Button>
+          <div className="mt-4 flex items-center justify-center">
+            <img src="/zohoform-qr.png" alt="Zoho Form QR Code" className="w-48 h-48" />
+          </div>
           <div className="mt-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
             <div className="flex items-center">
               <ShieldCheck className="mr-2 h-4 w-4 text-green-500" />
@@ -229,11 +236,17 @@ export default function HomePage() {
             </li>
           </ul>
           <Button size="lg" asChild>
-            <Link href="https://tally.so/r/your-waitlist-form" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://forms.zohopublic.com/adminadh1/form/AdhifyEarlyAccessandUpdateSubscription/formperma/Cxi7SR_zztlUKsiUTjlXL7EH8eM2Xp2fdGusjmKZAEw"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Join Early Access Now
             </Link>
           </Button>
-
+          <div className="mt-4 flex items-center justify-center">
+            <img src="/zohoform-qr.png" alt="Zoho Form QR Code" className="w-48 h-48" />
+          </div>
           {/* Countdown */}
           {/* <div className="mt-12">
             <h3 className="text-xl font-semibold mb-2">MVP Launch Countdown</h3>
@@ -257,7 +270,7 @@ export default function HomePage() {
           </ul>
           <div className="mt-6">
             <Link
-              href="https://your-blog-or-medium-link.com"
+              href="https://linkedin.com/company/adhify"
               className="text-blue-600 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
@@ -426,6 +439,9 @@ export default function HomePage() {
               <p className="text-gray-400">Contact us at hello@adhify.com</p>
               <p className="mt-2 text-gray-400">Join our community on social media</p>
             </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; {new Date().getFullYear()} Adhify. All rights reserved.</p>
           </div>
         </div>
       </footer>
