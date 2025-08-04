@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { NewPublicAppModal } from './NewPublicAppModal';
+import { NewDatabaseModal } from './NewDatabaseModal';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceCard } from './resource-card';
@@ -13,6 +16,9 @@ interface ProjectOverviewProps {
 }
 
 export function ProjectOverview({ project }: ProjectOverviewProps) {
+  const [open, setOpen] = useState(false);
+  const [databaseModalOpen, setDatabaseModalOpen] = useState(false);
+
   const { data: resources } = clientApi.project.getResources.useQuery({
     projectId: project?.id,
   });
@@ -69,14 +75,21 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">All Resources</h3>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+            <Button variant="outline" size="sm" className="gap-2 bg-transparent" onClick={() => setOpen(true)}>
               <Globe className="h-4 w-4" />
               New App
             </Button>
-            <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+            <NewPublicAppModal open={open} setOpen={setOpen} projectId={project?.id} />
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 bg-transparent"
+              onClick={() => setDatabaseModalOpen(true)}
+            >
               <Database className="h-4 w-4" />
               New Database
             </Button>
+            <NewDatabaseModal open={databaseModalOpen} setOpen={setDatabaseModalOpen} projectId={project?.id} />
           </div>
         </div>
 
@@ -85,9 +98,9 @@ export function ProjectOverview({ project }: ProjectOverviewProps) {
             <ResourceCard
               key={resource.id}
               resource={resource}
-              onView={(id) => console.log('View', id)}
-              onEdit={(id) => console.log('Edit', id)}
-              onDelete={(id) => console.log('Delete', id)}
+              onView={(id: string) => console.log('View', id)}
+              onEdit={(id: string) => console.log('Edit', id)}
+              onDelete={(id: string) => console.log('Delete', id)}
             />
           ))}
         </div>

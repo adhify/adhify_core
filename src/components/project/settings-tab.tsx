@@ -41,7 +41,6 @@ export function SettingsTab({ project }: SettingsTabProps) {
       toast.success('Project Update Successfully!');
     },
     onError(error) {
-      console.log('Error', error);
       toast.error('Error Update Project!');
     },
   });
@@ -52,8 +51,7 @@ export function SettingsTab({ project }: SettingsTabProps) {
       router.push(`/dashboard`);
     },
     onError(error) {
-      console.log('Error', error);
-      toast.error('Error Deleting Project!');
+      toast.error(error.message || 'Error deleting project');
     },
   });
 

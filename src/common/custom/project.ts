@@ -1,5 +1,6 @@
 import z from 'zod';
-import { ProjectSchema } from '../validation/generated';
+import { AppSchema, DatabaseSchema, ProjectSchema, ResourceSchema } from '../validation/generated';
+import { ZAppMetaSchema } from './apps';
 
 export const ZProject = ProjectSchema;
 
@@ -32,3 +33,18 @@ export const ZProjectWithStats = ZProject.extend({
 });
 
 export type IProjectWithStats = (typeof ZProjectWithStats)['_output'];
+
+export const ZResource = ResourceSchema.extend({
+  app: AppSchema.extend({
+    meta: ZAppMetaSchema.optional(),
+  }).nullable(),
+  database: DatabaseSchema.extend({
+    meta: z.any().optional(),
+  }).nullable(),
+});
+
+export type IResource = (typeof ZResource)['_output'];
+
+export const ZResources = ZResource.array();
+
+export type IResources = (typeof ZResources)['_output'];

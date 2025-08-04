@@ -32,18 +32,18 @@ export function ProjectNavigation({ activeTab, onTabChange, projectName, project
       label: 'Overview',
       icon: <FolderOpen className="h-4 w-4" />,
     },
-    {
-      id: 'apps',
-      label: 'Apps',
-      icon: <Globe className="h-4 w-4" />,
-      badge: projectStats?.apps,
-    },
-    {
-      id: 'databases',
-      label: 'Databases',
-      icon: <Database className="h-4 w-4" />,
-      badge: projectStats?.databases,
-    },
+    // {
+    //   id: 'apps',
+    //   label: 'Apps',
+    //   icon: <Globe className="h-4 w-4" />,
+    //   badge: projectStats?.apps,
+    // },
+    // {
+    //   id: 'databases',
+    //   label: 'Databases',
+    //   icon: <Database className="h-4 w-4" />,
+    //   badge: projectStats?.databases,
+    // },
     {
       id: 'settings',
       label: 'Settings',

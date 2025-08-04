@@ -42,14 +42,15 @@ model User {
   emailVerified DateTime?
   password      String?
 
-  status        UserStatus @default(INACTIVE)
+  status        UserStatus   @default(INACTIVE)
   lastLoginAt   DateTime?
-  loginAttempts Int        @default(0)
+  loginAttempts Int          @default(0)
   lockedUntil   DateTime?
   project       Project[]
   resource      Resource[]
   app           App[]
   database      Database[]
+  Deployment    Deployment[]
 
   @@map("users")
 }
@@ -83,14 +84,26 @@ model Resource {
   project   Project @relation(fields: [projectId], references: [id])
   envId     String
 
-  type ResourceType
-
-  app      App?
-  database Database?
-  userSub  String
-  user     User      @relation(fields: [userSub], references: [sub])
+  type            ResourceType
+  resource_status ResourceStatus @default(stopped)
+  app             App?
+  database        Database?
+  userSub         String
+  user            User           @relation(fields: [userSub], references: [sub])
 
   @@map("resources")
+}
+
+enum BuildPack {
+  nixpacks
+  static
+}
+
+enum ResourceStatus {
+  running
+  stopped
+  error
+  deploying
 }
 
 model App {
@@ -99,14 +112,24 @@ model App {
   name        String
   description String?
 
-  resource  Resource @relation(fields: [resouceId], references: [id])
-  resouceId String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userSub   String
-  user      User     @relation(fields: [userSub], references: [sub])
+  git_repository String
+  github_branch  String       @default("main")
+  build_pack     BuildPack
+  resource       Resource     @relation(fields: [resouceId], references: [id])
+  resouceId      String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  userSub        String
+  user           User         @relation(fields: [userSub], references: [sub])
+  deployment     Deployment[]
 
   @@map("apps")
+}
+
+enum DatabaseType {
+  postgres
+  mysql
+  mongodb
 }
 
 model Database {
@@ -122,5 +145,24 @@ model Database {
   userSub     String
   user        User     @relation(fields: [userSub], references: [sub])
 
+  databaseType     DatabaseType
+  databaseName     String
+  databaseUserName String
+  databasePassword String
+
   @@map("databases")
+}
+
+model Deployment {
+  id        String   @id @default(cuid())
+  uuid      String
+  appId     String
+  app       App      @relation(fields: [appId], references: [id])
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userSub   String
+  user      User     @relation(fields: [userSub], references: [sub])
+
+  @@map("deployments")
 }

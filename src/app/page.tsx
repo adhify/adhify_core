@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Globe,
   DollarSign,
@@ -17,9 +17,9 @@ import {
   Linkedin,
   Star,
   MessageCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 // Countdown Timer Component
 function CountdownTimer({ targetDate }: { targetDate: Date }) {
@@ -57,14 +57,14 @@ function CountdownTimer({ targetDate }: { targetDate: Date }) {
 
   return (
     <div className="text-center font-mono text-3xl tracking-widest text-blue-700">
-      <span>{timeLeft.days}d</span> : <span>{timeLeft.hours}h</span> :{" "}
-      <span>{timeLeft.minutes}m</span> : <span>{timeLeft.seconds}s</span>
+      <span>{timeLeft.days}d</span> : <span>{timeLeft.hours}h</span> : <span>{timeLeft.minutes}m</span> :{' '}
+      <span>{timeLeft.seconds}s</span>
     </div>
   );
 }
 
 export default function HomePage() {
-  const mvpLaunchDate = new Date("2025-08-31T00:00:00");
+  const mvpLaunchDate = new Date('2025-08-31T00:00:00');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -73,16 +73,10 @@ export default function HomePage() {
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg">
-              <img
-                src="/adhify_logo_full.svg"
-                alt="Adhify Logo"
-                className="h-20 w-20"
-              />
+              <img src="/adhify_logo_full.svg" alt="Adhify Logo" className="h-20 w-20" />
             </div>
           </div>
-          <div className="text-sm font-medium text-gray-600">
-            Coming Soon 🚀
-          </div>
+          <div className="text-sm font-medium text-gray-600">Coming Soon 🚀</div>
         </div>
       </header>
 
@@ -96,17 +90,12 @@ export default function HomePage() {
             Empowering Nepali Developers <br /> To Own Their Cloud
           </h1>
           <p className="mb-8 text-xl text-gray-700">
-            The cloud should serve you — not the other way around. At Adhify, we
-            envision a future where Nepal’s developers, students, and startups
-            can deploy and control their applications on their own terms, with
+            The cloud should serve you — not the other way around. At Adhify, we envision a future where Nepal’s
+            developers, students, and startups can deploy and control their applications on their own terms, with
             transparency, affordability, and local support.
           </p>
           <Button size="lg" asChild>
-            <Link
-              href="https://tally.so/r/your-waitlist-form"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link href="https://tally.so/r/your-waitlist-form" target="_blank" rel="noopener noreferrer">
               Get Updates & Join Early Access
             </Link>
           </Button>
@@ -127,52 +116,45 @@ export default function HomePage() {
       <section className="bg-white px-4 py-20">
         <div className="container mx-auto max-w-4xl">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-              Why We’re Building Adhify
-            </h2>
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl">Why We’re Building Adhify</h2>
             <p className="mx-auto max-w-3xl text-lg text-gray-700">
-              Nepal’s tech community faces unique challenges that make adopting
-              existing global cloud platforms difficult:
+              Nepal’s tech community faces unique challenges that make adopting existing global cloud platforms
+              difficult:
             </p>
           </div>
           <ul className="mx-auto max-w-3xl space-y-8 text-left text-lg text-gray-700">
             <li className="flex items-start space-x-4">
               <DollarSign className="mt-1 h-6 w-6 flex-shrink-0 text-blue-600" />
               <span>
-                <strong>Costs That Don’t Match Local Budgets:</strong> Many
-                cloud providers’ pricing models are complicated and expensive
-                for students, freelancers, and startups here.
+                <strong>Costs That Don’t Match Local Budgets:</strong> Many cloud providers’ pricing models are
+                complicated and expensive for students, freelancers, and startups here.
               </span>
             </li>
             <li className="flex items-start space-x-4">
               <ShieldCheck className="mt-1 h-6 w-6 flex-shrink-0 text-blue-600" />
               <span>
-                <strong>Limited Control & Data Privacy:</strong> Hosting
-                overseas raises concerns around latency, data sovereignty, and
-                privacy compliance.
+                <strong>Limited Control & Data Privacy:</strong> Hosting overseas raises concerns around latency, data
+                sovereignty, and privacy compliance.
               </span>
             </li>
             <li className="flex items-start space-x-4">
               <Headphones className="mt-1 h-6 w-6 flex-shrink-0 text-blue-600" />
               <span>
-                <strong>Lack of Localized Support & Community:</strong> Few
-                platforms understand the specific needs of Nepal’s developers or
-                provide local help.
+                <strong>Lack of Localized Support & Community:</strong> Few platforms understand the specific needs of
+                Nepal’s developers or provide local help.
               </span>
             </li>
             <li className="flex items-start space-x-4">
               <Cpu className="mt-1 h-6 w-6 flex-shrink-0 text-blue-600" />
               <span>
-                <strong>Technical Barriers:</strong> Managing cloud
-                infrastructure requires specialized DevOps skills that many
-                learners and small teams find intimidating.
+                <strong>Technical Barriers:</strong> Managing cloud infrastructure requires specialized DevOps skills
+                that many learners and small teams find intimidating.
               </span>
             </li>
           </ul>
           <p className="mx-auto mt-12 max-w-3xl text-center text-lg text-gray-600">
-            Our mission is to create a cloud platform designed for Nepal —
-            simple, transparent, and empowering — so our community can build
-            with confidence and ownership.
+            Our mission is to create a cloud platform designed for Nepal — simple, transparent, and empowering — so our
+            community can build with confidence and ownership.
           </p>
         </div>
       </section>
@@ -184,48 +166,40 @@ export default function HomePage() {
             A Local Alternative to Global Cloud Platforms
           </h2>
           <p className="mx-auto mb-12 max-w-3xl text-center text-lg text-gray-700">
-            Many global cloud platforms offer great convenience but come with
-            hidden costs, data privacy concerns, and limited control —
-            especially for developers in Nepal. Adhify is designed to fill that
-            gap by providing a cloud platform tailored to local needs.
+            Many global cloud platforms offer great convenience but come with hidden costs, data privacy concerns, and
+            limited control — especially for developers in Nepal. Adhify is designed to fill that gap by providing a
+            cloud platform tailored to local needs.
           </p>
           <div className="mx-auto grid max-w-6xl gap-10 text-center md:grid-cols-4">
             <div className="flex flex-col items-center space-y-4">
               <Server className="h-12 w-12 text-blue-600" />
-              <h3 className="text-xl font-semibold">
-                Full Control & Ownership
-              </h3>
+              <h3 className="text-xl font-semibold">Full Control & Ownership</h3>
               <p className="text-gray-700">
-                Unlike opaque managed platforms, you decide where and how your
-                apps run — on servers you trust and control.
+                Unlike opaque managed platforms, you decide where and how your apps run — on servers you trust and
+                control.
               </p>
             </div>
             <div className="flex flex-col items-center space-y-4">
               <DollarSign className="h-12 w-12 text-blue-600" />
-              <h3 className="text-xl font-semibold">
-                Affordable & Transparent Pricing
-              </h3>
+              <h3 className="text-xl font-semibold">Affordable & Transparent Pricing</h3>
               <p className="text-gray-700">
-                No complicated billing or surprise charges. Pricing designed for
-                Nepal’s developers, startups, and students.
+                No complicated billing or surprise charges. Pricing designed for Nepal’s developers, startups, and
+                students.
               </p>
             </div>
             <div className="flex flex-col items-center space-y-4">
               <CloudCog className="h-12 w-12 text-blue-600" />
               <h3 className="text-xl font-semibold">Simplified Deployment</h3>
               <p className="text-gray-700">
-                Get the ease of deploying apps without needing to master complex
-                DevOps tools or cloud vendor quirks.
+                Get the ease of deploying apps without needing to master complex DevOps tools or cloud vendor quirks.
               </p>
             </div>
             <div className="flex flex-col items-center space-y-4">
               <Users className="h-12 w-12 text-blue-600" />
-              <h3 className="text-xl font-semibold">
-                Built for Nepal’s Community
-              </h3>
+              <h3 className="text-xl font-semibold">Built for Nepal’s Community</h3>
               <p className="text-gray-700">
-                Local support, community-driven features, and infrastructure
-                optimized for Nepal’s connectivity and regulations.
+                Local support, community-driven features, and infrastructure optimized for Nepal’s connectivity and
+                regulations.
               </p>
             </div>
           </div>
@@ -235,25 +209,19 @@ export default function HomePage() {
       {/* Early Adopter Program Section */}
       <section className="bg-white px-4 py-20">
         <div className="container mx-auto max-w-3xl text-center">
-          <h2 className="mb-6 text-3xl font-bold md:text-4xl">
-            Join Our Early Adopter Program
-          </h2>
+          <h2 className="mb-6 text-3xl font-bold md:text-4xl">Join Our Early Adopter Program</h2>
           <p className="mb-6 text-lg text-gray-700">
-            Become one of the first users of Adhify! Help shape the platform,
-            get free access during MVP, and enjoy direct support from our team.
+            Become one of the first users of Adhify! Help shape the platform, get free access during MVP, and enjoy
+            direct support from our team.
           </p>
           <ul className="mx-auto mb-8 max-w-md list-none space-y-6 text-left text-gray-700">
             <li className="flex items-center space-x-4">
               <Users className="h-6 w-6 flex-shrink-0 text-blue-600" />
-              <span>
-                Exclusive free access for early adopters (limited slots)
-              </span>
+              <span>Exclusive free access for early adopters (limited slots)</span>
             </li>
             <li className="flex items-center space-x-4">
               <Star className="h-6 w-6 flex-shrink-0 text-blue-600" />
-              <span>
-                Be part of product development and give direct feedback
-              </span>
+              <span>Be part of product development and give direct feedback</span>
             </li>
             <li className="flex items-center space-x-4">
               <MessageCircle className="h-6 w-6 flex-shrink-0 text-blue-600" />
@@ -261,11 +229,7 @@ export default function HomePage() {
             </li>
           </ul>
           <Button size="lg" asChild>
-            <Link
-              href="https://tally.so/r/your-waitlist-form"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link href="https://tally.so/r/your-waitlist-form" target="_blank" rel="noopener noreferrer">
               Join Early Access Now
             </Link>
           </Button>
@@ -283,17 +247,12 @@ export default function HomePage() {
         <div className="container mx-auto max-w-3xl text-center">
           <h2 className="mb-4 text-3xl font-bold">What We’re Working On</h2>
           <p className="mb-8 text-gray-700">
-            We’re early in the journey and want to build this platform with you.
-            Here are some key focus areas:
+            We’re early in the journey and want to build this platform with you. Here are some key focus areas:
           </p>
           <ul className="mx-auto max-w-xl space-y-4 text-left text-lg text-gray-700">
-            <li>
-              ✅ Understanding local challenges through community feedback
-            </li>
+            <li>✅ Understanding local challenges through community feedback</li>
             <li>⚙️ Designing a simple self-hosted cloud solution</li>
-            <li>
-              🧪 Preparing early access programs for students and startups
-            </li>
+            <li>🧪 Preparing early access programs for students and startups</li>
             <li>🤝 Building a support network for Nepali developers</li>
           </ul>
           <div className="mt-6">
@@ -312,44 +271,34 @@ export default function HomePage() {
       {/* FAQ Section */}
       <section className="bg-white px-4 py-20">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="mb-10 text-center text-3xl font-bold md:text-4xl">
-            Frequently Asked Questions
-          </h2>
+          <h2 className="mb-10 text-center text-3xl font-bold md:text-4xl">Frequently Asked Questions</h2>
           <div className="mx-auto max-w-3xl space-y-8 text-lg text-gray-700">
             <div>
               <h3 className="mb-2 font-semibold">What is Adhify?</h3>
               <p>
-                Adhify is a cloud platform built for Nepal’s developers,
-                startups, and students to deploy applications on infrastructure
-                they control — with affordable pricing and local support.
+                Adhify is a cloud platform built for Nepal’s developers, startups, and students to deploy applications
+                on infrastructure they control — with affordable pricing and local support.
               </p>
             </div>
             <div>
               <h3 className="mb-2 font-semibold">When will I get access?</h3>
               <p>
-                We plan to launch our MVP in late August 2025. Early adopters
-                will get free access and the chance to provide feedback during
-                this period.
+                We plan to launch our MVP in late August 2025. Early adopters will get free access and the chance to
+                provide feedback during this period.
               </p>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold">
-                How is Adhify different from other cloud platforms?
-              </h3>
+              <h3 className="mb-2 font-semibold">How is Adhify different from other cloud platforms?</h3>
               <p>
-                Unlike global platforms, Adhify prioritizes transparency, local
-                needs, affordability, and gives you full control over where your
-                apps run.
+                Unlike global platforms, Adhify prioritizes transparency, local needs, affordability, and gives you full
+                control over where your apps run.
               </p>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold">
-                What level of support will early adopters receive?
-              </h3>
+              <h3 className="mb-2 font-semibold">What level of support will early adopters receive?</h3>
               <p>
-                Early adopters get priority support, direct communication
-                channels with our team, and access to exclusive community
-                events.
+                Early adopters get priority support, direct communication channels with our team, and access to
+                exclusive community events.
               </p>
             </div>
           </div>
@@ -402,9 +351,7 @@ export default function HomePage() {
                 </div>
                 <span className="text-xl font-bold">Adhify</span>
               </div>
-              <p className="text-gray-400">
-                Nepal’s own cloud platform, built with love and purpose.
-              </p>
+              <p className="text-gray-400">Nepal’s own cloud platform, built with love and purpose.</p>
             </div>
             <div>
               <h3 className="mb-4 font-semibold">Product</h3>
@@ -435,11 +382,7 @@ export default function HomePage() {
               <h3 className="mb-4 font-semibold">Connect</h3>
               <ul className="flex justify-start space-x-4 text-gray-400">
                 <li>
-                  <Link
-                    href="mailto:hello@adhify.com"
-                    className="hover:text-white"
-                    aria-label="Email"
-                  >
+                  <Link href="mailto:hello@adhify.com" className="hover:text-white" aria-label="Email">
                     <Mail className="h-5 w-5" />
                   </Link>
                 </li>
@@ -481,13 +424,8 @@ export default function HomePage() {
             <div>
               <h3 className="mb-4 font-semibold">Support</h3>
               <p className="text-gray-400">Contact us at hello@adhify.com</p>
-              <p className="mt-2 text-gray-400">
-                Join our community on social media
-              </p>
+              <p className="mt-2 text-gray-400">Join our community on social media</p>
             </div>
-          </div>
-          <div className="mt-8 border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Adhify. All rights reserved.</p>
           </div>
         </div>
       </footer>

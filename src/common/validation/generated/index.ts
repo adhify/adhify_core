@@ -16,11 +16,13 @@ export const UserScalarFieldEnumSchema = z.enum(['id','sub','email','name','avat
 
 export const ProjectScalarFieldEnumSchema = z.enum(['id','uuid','name','slug','description','createdAt','updatedAt','userSub']);
 
-export const ResourceScalarFieldEnumSchema = z.enum(['id','projectId','envId','type','userSub']);
+export const ResourceScalarFieldEnumSchema = z.enum(['id','projectId','envId','type','resource_status','userSub']);
 
-export const AppScalarFieldEnumSchema = z.enum(['id','uuid','name','description','resouceId','createdAt','updatedAt','userSub']);
+export const AppScalarFieldEnumSchema = z.enum(['id','uuid','name','description','git_repository','github_branch','build_pack','resouceId','createdAt','updatedAt','userSub']);
 
-export const DatabaseScalarFieldEnumSchema = z.enum(['id','uuid','name','description','resouceId','createdAt','updatedAt','userSub']);
+export const DatabaseScalarFieldEnumSchema = z.enum(['id','uuid','name','description','resouceId','createdAt','updatedAt','userSub','databaseType','databaseName','databaseUserName','databasePassword']);
+
+export const DeploymentScalarFieldEnumSchema = z.enum(['id','uuid','appId','message','createdAt','updatedAt','userSub']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -35,6 +37,18 @@ export type UserStatusType = `${z.infer<typeof UserStatusSchema>}`
 export const ResourceTypeSchema = z.enum(['APP','DATABASE']);
 
 export type ResourceTypeType = `${z.infer<typeof ResourceTypeSchema>}`
+
+export const BuildPackSchema = z.enum(['nixpacks','static']);
+
+export type BuildPackType = `${z.infer<typeof BuildPackSchema>}`
+
+export const ResourceStatusSchema = z.enum(['running','stopped','error','deploying']);
+
+export type ResourceStatusType = `${z.infer<typeof ResourceStatusSchema>}`
+
+export const DatabaseTypeSchema = z.enum(['postgres','mysql','mongodb']);
+
+export type DatabaseTypeType = `${z.infer<typeof DatabaseTypeSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -70,6 +84,7 @@ export type UserRelations = {
   resource: ResourceWithRelations[];
   app: AppWithRelations[];
   database: DatabaseWithRelations[];
+  Deployment: DeploymentWithRelations[];
 };
 
 export type UserWithRelations = z.infer<typeof UserSchema> & UserRelations
@@ -79,6 +94,7 @@ export const UserWithRelationsSchema: z.ZodType<UserWithRelations> = UserSchema.
   resource: z.lazy(() => ResourceWithRelationsSchema).array(),
   app: z.lazy(() => AppWithRelationsSchema).array(),
   database: z.lazy(() => DatabaseWithRelationsSchema).array(),
+  Deployment: z.lazy(() => DeploymentWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -119,6 +135,7 @@ export const ProjectWithRelationsSchema: z.ZodType<ProjectWithRelations> = Proje
 
 export const ResourceSchema = z.object({
   type: ResourceTypeSchema,
+  resource_status: ResourceStatusSchema,
   id: z.string(),
   projectId: z.string(),
   envId: z.string(),
@@ -151,10 +168,13 @@ export const ResourceWithRelationsSchema: z.ZodType<ResourceWithRelations> = Res
 /////////////////////////////////////////
 
 export const AppSchema = z.object({
+  build_pack: BuildPackSchema,
   id: z.string(),
   uuid: z.string(),
   name: z.string(),
   description: z.string().nullish(),
+  git_repository: z.string(),
+  github_branch: z.string(),
   resouceId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -169,6 +189,7 @@ export type App = z.infer<typeof AppSchema>
 export type AppRelations = {
   resource: ResourceWithRelations;
   user: UserWithRelations;
+  deployment: DeploymentWithRelations[];
 };
 
 export type AppWithRelations = z.infer<typeof AppSchema> & AppRelations
@@ -176,6 +197,7 @@ export type AppWithRelations = z.infer<typeof AppSchema> & AppRelations
 export const AppWithRelationsSchema: z.ZodType<AppWithRelations> = AppSchema.merge(z.object({
   resource: z.lazy(() => ResourceWithRelationsSchema),
   user: z.lazy(() => UserWithRelationsSchema),
+  deployment: z.lazy(() => DeploymentWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -183,6 +205,7 @@ export const AppWithRelationsSchema: z.ZodType<AppWithRelations> = AppSchema.mer
 /////////////////////////////////////////
 
 export const DatabaseSchema = z.object({
+  databaseType: DatabaseTypeSchema,
   id: z.string(),
   uuid: z.string(),
   name: z.string(),
@@ -191,6 +214,9 @@ export const DatabaseSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   userSub: z.string(),
+  databaseName: z.string(),
+  databaseUserName: z.string(),
+  databasePassword: z.string(),
 })
 
 export type Database = z.infer<typeof DatabaseSchema>
@@ -207,5 +233,36 @@ export type DatabaseWithRelations = z.infer<typeof DatabaseSchema> & DatabaseRel
 
 export const DatabaseWithRelationsSchema: z.ZodType<DatabaseWithRelations> = DatabaseSchema.merge(z.object({
   resource: z.lazy(() => ResourceWithRelationsSchema),
+  user: z.lazy(() => UserWithRelationsSchema),
+}))
+
+/////////////////////////////////////////
+// DEPLOYMENT SCHEMA
+/////////////////////////////////////////
+
+export const DeploymentSchema = z.object({
+  id: z.string().cuid(),
+  uuid: z.string(),
+  appId: z.string(),
+  message: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  userSub: z.string(),
+})
+
+export type Deployment = z.infer<typeof DeploymentSchema>
+
+// DEPLOYMENT RELATION SCHEMA
+//------------------------------------------------------
+
+export type DeploymentRelations = {
+  app: AppWithRelations;
+  user: UserWithRelations;
+};
+
+export type DeploymentWithRelations = z.infer<typeof DeploymentSchema> & DeploymentRelations
+
+export const DeploymentWithRelationsSchema: z.ZodType<DeploymentWithRelations> = DeploymentSchema.merge(z.object({
+  app: z.lazy(() => AppWithRelationsSchema),
   user: z.lazy(() => UserWithRelationsSchema),
 }))

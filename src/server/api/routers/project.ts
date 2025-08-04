@@ -1,10 +1,19 @@
 import { createTRPCRouter, authroizedProcedure } from '../trpc';
-import { Prisma } from '@prisma/client';
+import { Prisma, ResourceType } from '@prisma/client';
 import slugify from 'slugify';
-import { ZProjectCreateInput, ZProjects, ZProjectUpdateInput, ZProjectWithStats } from '@/common/custom/project';
+import {
+  IResources,
+  ZProjectCreateInput,
+  ZProjects,
+  ZProjectUpdateInput,
+  ZProjectWithStats,
+  ZResources,
+} from '@/common/custom/project';
 import { ZIdInput, ZProjectIdInput } from '@/common/custom';
 import { callCoolifyApi } from '@/util/coolify/coolifyApi';
 import { error } from 'console';
+import { IAppMetaSchema } from '@/common/custom/apps';
+import { generateDBUrl } from '@/util/generateDBUrl';
 
 interface CreateProjectPayload {
   name: string;
@@ -81,17 +90,43 @@ export const projectRouter = createTRPCRouter({
       return { ...project, stats: { apps: appCount, databases: dbCount } };
     }),
 
-  getResources: authroizedProcedure.input(ZProjectIdInput).query(async ({ ctx, input }) => {
-    const resources = await ctx.db.resource.findMany({
-      where: { id: input.projectId, userSub: ctx.supabaseUser?.id },
-    });
-
-    if (!resources) {
-      return null;
-    }
-
-    return resources;
-  }),
+  getResources: authroizedProcedure
+    .input(ZProjectIdInput)
+    .output(ZResources)
+    .query(async ({ ctx, input }) => {
+      const resources = await ctx.db.resource.findMany({
+        where: { projectId: input.projectId, userSub: ctx.supabaseUser?.id },
+        include: {
+          app: true,
+          database: true,
+        },
+      });
+      if (!resources) {
+        return [];
+      }
+      const resourcesWithMeta: IResources = await Promise.all(
+        resources.map(async (resource) => {
+          if (resource.type === ResourceType.APP && resource.app?.id) {
+            const appMeta: IAppMetaSchema = await callCoolifyApi<IAppMetaSchema>({
+              endpoint: `/applications/${resource.app?.uuid}`,
+              method: 'GET',
+            });
+            return { ...resource, app: { ...resource.app, meta: appMeta } };
+          } else if (resource.type === ResourceType.DATABASE && resource.database?.id) {
+            const dbMeta: any = await callCoolifyApi({
+              endpoint: `/databases/${resource.database?.uuid}`,
+              method: 'GET',
+            });
+            const dbUrl = generateDBUrl(resource);
+            return { ...resource, database: { ...resource.database, meta: { ...dbMeta, dbString: dbUrl } } };
+          } else {
+            throw new Error('Error getting resources');
+          }
+        })
+      );
+      ZResources.parse(resourcesWithMeta);
+      return resourcesWithMeta;
+    }),
 
   list: authroizedProcedure.output(ZProjects).query(async ({ ctx }) => {
     return ctx.db.project.findMany({
@@ -130,11 +165,16 @@ export const projectRouter = createTRPCRouter({
 
     if (!project) throw error('Project Not Found');
 
-    await callCoolifyApi<null, UpdateProjectPayload>({
-      endpoint: `/projects/${project.uuid}`,
-      method: 'DELETE',
-    });
-
+    try {
+      await callCoolifyApi<null, UpdateProjectPayload>({
+        endpoint: `/projects/${project.uuid}`,
+        method: 'DELETE',
+      });
+    } catch (error: Error | any) {
+      if (error.message.includes('Project has resources, so it cannot be deleted.'))
+        throw new Error('Project has resources, so it cannot be deleted.');
+      throw new Error('Error deleting project from Coolify');
+    }
     return ctx.db.project.delete({
       where: { id: input.id, userSub: ctx.supabaseUser?.id },
     });
