@@ -11,6 +11,13 @@ interface CreateDatabasePayload {
   server_uuid: string;
   environment_name: string;
   environment_uuid: string;
+  limits_memory: string;
+  limits_memory_swap: string;
+  limits_memory_swappiness: number;
+  limits_memory_reservation: string;
+  limits_cpus: string;
+  limits_cpuset: string;
+  limits_cpu_shares: number;
   postgres_user?: string;
   postgres_password?: string;
   postgres_db?: string;
@@ -57,6 +64,13 @@ export const databaseRouter = createTRPCRouter({
       server_uuid: process.env.NEXT_PUBLIC_SERVER_UUID as string,
       environment_name: 'production',
       environment_uuid: process.env.NEXT_PUBLIC_COOLIFY_ENV_UUID as string,
+      limits_memory: '256m',
+      limits_memory_swap: '0',
+      limits_memory_swappiness: 0,
+      limits_memory_reservation: '256m',
+      limits_cpus: '0.1',
+      limits_cpuset: '0',
+      limits_cpu_shares: 512,
       ...(input.databaseType === DatabaseType.postgres && {
         postgres_user: input.databaseUserName,
         postgres_password: input.databasePassword,

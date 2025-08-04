@@ -16,6 +16,13 @@ interface CreateAppPayload {
   git_branch: string;
   build_pack: string;
   domains: string;
+  limits_memory: string;
+  limits_memory_swap: string;
+  limits_memory_swappiness: number;
+  limits_memory_reservation: string;
+  limits_cpus: string;
+  limits_cpuset: string;
+  limits_cpu_shares: number;
 }
 interface CreateAppResponse {
   uuid: string;
@@ -58,6 +65,13 @@ export const appRouter = createTRPCRouter({
       git_branch: 'main',
       build_pack: input.build_pack,
       domains: `https://${domainLabel}`,
+      limits_memory: '256m',
+      limits_memory_swap: '0',
+      limits_memory_swappiness: 0,
+      limits_memory_reservation: '256m',
+      limits_cpus: '0.1',
+      limits_cpuset: '0',
+      limits_cpu_shares: 512,
     };
 
     const response = await callCoolifyApi<CreateAppResponse, CreateAppPayload>({
