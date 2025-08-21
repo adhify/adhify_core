@@ -5,12 +5,9 @@ import { useParams } from 'next/navigation';
 import { TopNav } from '@/components/layout/top-nav';
 import { ProjectNavigation } from '@/components/layout/project-navigation';
 import { ProjectOverview } from '@/components/project/project-overview';
-import { AppsTab } from '@/components/project/apps-tab';
-import { DatabasesTab } from '@/components/project/databases-tab';
 import { SettingsTab } from '@/components/project/settings-tab';
 import { clientApi } from '@/trpc/react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -24,10 +21,6 @@ export default function ProjectDetailPage() {
     switch (activeTab) {
       case 'overview':
         return project && <ProjectOverview project={project} />;
-      case 'apps':
-        return project && <AppsTab projectId={projectId} />;
-      case 'databases':
-        return project && <DatabasesTab projectId={projectId} />;
       case 'settings':
         return project && <SettingsTab project={project} />;
       default:

@@ -24,6 +24,8 @@ export const DatabaseScalarFieldEnumSchema = z.enum(['id','uuid','name','descrip
 
 export const DeploymentScalarFieldEnumSchema = z.enum(['id','uuid','appId','message','createdAt','updatedAt','userSub']);
 
+export const EnvironmentVariablesScalarFieldEnumSchema = z.enum(['id','uuid','appId','key','value','createdAt','updatedAt','userSub']);
+
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
@@ -84,7 +86,8 @@ export type UserRelations = {
   resource: ResourceWithRelations[];
   app: AppWithRelations[];
   database: DatabaseWithRelations[];
-  Deployment: DeploymentWithRelations[];
+  deployment: DeploymentWithRelations[];
+  environmentVariables: EnvironmentVariablesWithRelations[];
 };
 
 export type UserWithRelations = z.infer<typeof UserSchema> & UserRelations
@@ -94,7 +97,8 @@ export const UserWithRelationsSchema: z.ZodType<UserWithRelations> = UserSchema.
   resource: z.lazy(() => ResourceWithRelationsSchema).array(),
   app: z.lazy(() => AppWithRelationsSchema).array(),
   database: z.lazy(() => DatabaseWithRelationsSchema).array(),
-  Deployment: z.lazy(() => DeploymentWithRelationsSchema).array(),
+  deployment: z.lazy(() => DeploymentWithRelationsSchema).array(),
+  environmentVariables: z.lazy(() => EnvironmentVariablesWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -190,6 +194,7 @@ export type AppRelations = {
   resource: ResourceWithRelations;
   user: UserWithRelations;
   deployment: DeploymentWithRelations[];
+  environmentVariables: EnvironmentVariablesWithRelations[];
 };
 
 export type AppWithRelations = z.infer<typeof AppSchema> & AppRelations
@@ -198,6 +203,7 @@ export const AppWithRelationsSchema: z.ZodType<AppWithRelations> = AppSchema.mer
   resource: z.lazy(() => ResourceWithRelationsSchema),
   user: z.lazy(() => UserWithRelationsSchema),
   deployment: z.lazy(() => DeploymentWithRelationsSchema).array(),
+  environmentVariables: z.lazy(() => EnvironmentVariablesWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -263,6 +269,38 @@ export type DeploymentRelations = {
 export type DeploymentWithRelations = z.infer<typeof DeploymentSchema> & DeploymentRelations
 
 export const DeploymentWithRelationsSchema: z.ZodType<DeploymentWithRelations> = DeploymentSchema.merge(z.object({
+  app: z.lazy(() => AppWithRelationsSchema),
+  user: z.lazy(() => UserWithRelationsSchema),
+}))
+
+/////////////////////////////////////////
+// ENVIRONMENT VARIABLES SCHEMA
+/////////////////////////////////////////
+
+export const EnvironmentVariablesSchema = z.object({
+  id: z.string().cuid(),
+  uuid: z.string(),
+  appId: z.string(),
+  key: z.string(),
+  value: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  userSub: z.string(),
+})
+
+export type EnvironmentVariables = z.infer<typeof EnvironmentVariablesSchema>
+
+// ENVIRONMENT VARIABLES RELATION SCHEMA
+//------------------------------------------------------
+
+export type EnvironmentVariablesRelations = {
+  app: AppWithRelations;
+  user: UserWithRelations;
+};
+
+export type EnvironmentVariablesWithRelations = z.infer<typeof EnvironmentVariablesSchema> & EnvironmentVariablesRelations
+
+export const EnvironmentVariablesWithRelationsSchema: z.ZodType<EnvironmentVariablesWithRelations> = EnvironmentVariablesSchema.merge(z.object({
   app: z.lazy(() => AppWithRelationsSchema),
   user: z.lazy(() => UserWithRelationsSchema),
 }))
