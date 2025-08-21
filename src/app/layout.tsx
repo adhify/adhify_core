@@ -1,8 +1,6 @@
 import '@/styles/globals.css';
 
 import { GeistSans } from 'geist/font/sans';
-import Link from 'next/link';
-import { Globe, Mail, Linkedin } from 'lucide-react';
 
 import { TRPCReactProvider } from '@/trpc/react';
 import { Toaster } from 'sonner';

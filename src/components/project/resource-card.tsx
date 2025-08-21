@@ -28,6 +28,7 @@ import { ResourceType } from '@prisma/client';
 import { toast } from 'sonner';
 import type { TRPCError } from '@trpc/server';
 import { clientApi } from '@/trpc/react';
+import { AppSettingsModal } from './AppSettingsModal';
 
 // Simple modal implementation
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
@@ -73,6 +74,7 @@ export function ResourceCard({ resource, onEdit, onDelete, onView }: ResourceCar
       },
     });
   const [showDbModal, setShowDbModal] = useState<{ open: boolean; show: boolean }>({ open: false, show: false });
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const handleDeployApp = (app: { appId: string }) => {
     deployApp({ appId: app.appId });
@@ -136,8 +138,24 @@ export function ResourceCard({ resource, onEdit, onDelete, onView }: ResourceCar
                   >
                     {resource.resource_status === 'running' ? 'Stop' : 'Start'}
                   </DropdownMenuItem>
+                  {resource.type === ResourceType.APP && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setShowSettingsModal(true);
+                      }}
+                    >
+                      Settings
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
+              {resource.type === ResourceType.APP && (
+                <AppSettingsModal
+                  open={showSettingsModal}
+                  onClose={() => setShowSettingsModal(false)}
+                  resourceId={resource.app?.id || resource.database?.id || ''}
+                />
+              )}
             </div>
           </div>
         </CardHeader>
@@ -193,44 +211,6 @@ export function ResourceCard({ resource, onEdit, onDelete, onView }: ResourceCar
           </div>
         </CardContent>
       </Card>
-      <Modal open={showDbModal.open} onClose={() => setShowDbModal({ ...showDbModal, open: false })}>
-        <div className="w-[420px]">
-          <h2 className="text-lg font-semibold mb-3">Database Connection String</h2>
-          <div className="flex items-center gap-2">
-            <input
-              type={!showDbModal.show ? 'password' : 'text'}
-              value={resource.database?.meta.dbString || ''}
-              readOnly
-              className="bg-gray-100 rounded p-2 text-base font-mono break-all flex-1"
-              style={{ width: '100%' }}
-            />
-            <button
-              type="button"
-              className="p-2"
-              onClick={() => setShowDbModal((prev) => ({ ...prev, show: !prev.show }))}
-              aria-label={showDbModal.show ? 'Hide' : 'Show'}
-            >
-              {showDbModal.show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
-            <button
-              type="button"
-              className="p-2"
-              onClick={() => {
-                navigator.clipboard.writeText(resource.database?.meta.dbString || '');
-                toast.success('Copied to clipboard!');
-              }}
-              aria-label="Copy"
-            >
-              <Copy className="h-5 w-5" />
-            </button>
-          </div>
-          {!resource.database?.meta.dbString && (
-            <p className="bg-gray-100 rounded p-2 text-base font-mono break-all mt-2">
-              No connection string available.
-            </p>
-          )}
-        </div>
-      </Modal>
     </>
   );
 }

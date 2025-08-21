@@ -42,15 +42,16 @@ model User {
   emailVerified DateTime?
   password      String?
 
-  status        UserStatus   @default(INACTIVE)
-  lastLoginAt   DateTime?
-  loginAttempts Int          @default(0)
-  lockedUntil   DateTime?
-  project       Project[]
-  resource      Resource[]
-  app           App[]
-  database      Database[]
-  Deployment    Deployment[]
+  status               UserStatus             @default(INACTIVE)
+  lastLoginAt          DateTime?
+  loginAttempts        Int                    @default(0)
+  lockedUntil          DateTime?
+  project              Project[]
+  resource             Resource[]
+  app                  App[]
+  database             Database[]
+  deployment           Deployment[]
+  environmentVariables EnvironmentVariables[]
 
   @@map("users")
 }
@@ -112,16 +113,17 @@ model App {
   name        String
   description String?
 
-  git_repository String
-  github_branch  String       @default("main")
-  build_pack     BuildPack
-  resource       Resource     @relation(fields: [resouceId], references: [id])
-  resouceId      String       @unique
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  userSub        String
-  user           User         @relation(fields: [userSub], references: [sub])
-  deployment     Deployment[]
+  git_repository       String
+  github_branch        String                 @default("main")
+  build_pack           BuildPack
+  resource             Resource               @relation(fields: [resouceId], references: [id])
+  resouceId            String                 @unique
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  userSub              String
+  user                 User                   @relation(fields: [userSub], references: [sub])
+  deployment           Deployment[]
+  environmentVariables EnvironmentVariables[]
 
   @@map("apps")
 }
@@ -165,4 +167,20 @@ model Deployment {
   user      User     @relation(fields: [userSub], references: [sub])
 
   @@map("deployments")
+}
+
+model EnvironmentVariables {
+  id        String   @id @default(cuid())
+  uuid      String
+  appId     String
+  app       App      @relation(fields: [appId], references: [id])
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userSub   String
+  user      User     @relation(fields: [userSub], references: [sub])
+
+  @@unique([appId, key], name: "unique_appid_key")
+  @@map("environment_variables")
 }
