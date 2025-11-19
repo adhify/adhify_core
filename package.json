@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts",
+    "check": "npm run build && tsc",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -19,6 +23,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "1.3.0",
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "^5.14.0",
     "@radix-ui/react-alert-dialog": "^1.1.14",
