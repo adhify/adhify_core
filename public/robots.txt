@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://adhify.com
+
+# Sitemaps
+Sitemap: https://adhify.com/sitemap.xml
