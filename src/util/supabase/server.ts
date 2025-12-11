@@ -8,7 +8,7 @@ export const supabaseServer = () => {
   return supabaseCreateServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {
       getAll: () => {
-        return cookieStore.getAll();
+        return cookieStore.then((store) => store.getAll());
       },
       // setAll is intentionally omitted to avoid modifying cookies outside Server Actions or Route Handlers
     },
