@@ -66,6 +66,7 @@ export const metadata: Metadata = {
     },
   },
   category: 'technology',
+  icons: [{ rel: 'icon', url: '/adhify_logo.png' }],
 };
 
 export const viewport = {
